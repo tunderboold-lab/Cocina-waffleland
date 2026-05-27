@@ -1,14 +1,14 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
- 
+
 const supabase = createClient(
   "https://auweubelcxsvkifyibfw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1d2V1YmVsY3hzdmtpZnlpYmZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTk5MTYsImV4cCI6MjA5NDMzNTkxNn0.NLV2t1haEXKM-n8iyVpzCU9gx-CmTMPVJjmM0ZDlsXM"
 );
- 
+
 const TU_NUMERO = "5215544690495";
- 
+
 // ===== PRODUCTOS POR ÁREA =====
 const PRODUCTOS_AREA = {
   "Cajera": [
@@ -281,12 +281,14 @@ const PRODUCTOS_AREA = {
     {nombre:"Gas",unidad:"Tanque",optimo:1},
   ],
 };
- 
+
 const AREAS = Object.keys(PRODUCTOS_AREA);
 const AREA_EMOJIS = {
   "Cajera":"🧾","Pedidos a Domicilio":"🛵","Bebidas":"☕","Crepas":"🥞","Estación Dulce":"🧇","Frito":"🍟"
 };
- 
+
+const ROLES = ["trabajador", "subgerente", "gerente", "admin"];
+
 const ESTADOS = {
   pendiente: {label:"⏳ Pendiente", color:"#fbbf24", bg:"#fbbf2415"},
   aprobada: {label:"✅ Aprobada", color:"#34d399", bg:"#34d39915"},
@@ -295,13 +297,13 @@ const ESTADOS = {
   agotado: {label:"📭 Agotado", color:"#fb923c", bg:"#fb923c15"},
   en_espera: {label:"⏳ En espera", color:"#94a3b8", bg:"#94a3b815"},
 };
- 
+
 const C = {
   bg:"#060810", card:"#0d1117", border:"rgba(125,211,252,0.12)",
   accent:"#7dd3fc", text:"#e2e8f0", muted:"#64748b",
   warn:"#fbbf24", danger:"#f87171", success:"#34d399", info:"#818cf8"
 };
- 
+
 export default function CocinaApp() {
   const [usuario, setUsuario] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
@@ -324,38 +326,49 @@ export default function CocinaApp() {
   const [cargando, setCargando] = useState(true);
   const [modalNuevoProd, setModalNuevoProd] = useState(false);
   const [formNuevoProd, setFormNuevoProd] = useState({nombre:"",unidad:"",nota:""});
- 
-  const esAdmin = usuario?.rol === "admin" || usuario?.rol === "gerente";
+
+  // ===== ESTADOS PANEL USUARIOS =====
+  const [busqUsuarios, setBusqUsuarios] = useState("");
+  const [filtroAreaUsuarios, setFiltroAreaUsuarios] = useState("");
+  const [mostrarInactivos, setMostrarInactivos] = useState(false);
+  const [modalUsuario, setModalUsuario] = useState(null); // null | {nuevo:true} | {usuario obj}
+  const [formUsuario, setFormUsuario] = useState({nombre:"",pin:"",area:"",rol:"trabajador",notas:"",activo:true});
+  const [pinVisible, setPinVisible] = useState(false);
+  const [errorForm, setErrorForm] = useState("");
+  const [guardandoUsuario, setGuardandoUsuario] = useState(false);
+
+  const esAdmin = usuario?.rol === "admin";
+  const esGerenteOAdmin = usuario?.rol === "admin" || usuario?.rol === "gerente";
   const productosArea = usuario ? (PRODUCTOS_AREA[usuario.area] || []) : [];
   const productosFiltrados = productosArea.filter(p =>
     !busq || p.nombre.toLowerCase().includes(busq.toLowerCase())
   );
- 
+
   useEffect(() => {
     cargarDatos();
   }, []);
- 
+
   async function cargarDatos() {
     setCargando(true);
     const [rU, rS] = await Promise.all([
-      supabase.from("usuarios_cocina").select("*").eq("activo", true).order("nombre"),
+      supabase.from("usuarios_cocina").select("*").order("nombre"),
       supabase.from("solicitudes_cocina").select("*").order("creado_en", {ascending: false}).limit(200),
     ]);
     if (rU.data) setUsuarios(rU.data);
     if (rS.data) setSolicitudes(rS.data);
     setCargando(false);
   }
- 
+
   function login() {
-    const u = usuarios.find(x => x.nombre === nombreSel);
-    if (!u) { setErrorLogin("Usuario no encontrado"); return; }
+    const u = usuarios.find(x => x.nombre === nombreSel && x.activo);
+    if (!u) { setErrorLogin("Usuario no encontrado o inactivo"); return; }
     if (u.pin !== pinInput) { setErrorLogin("PIN incorrecto"); setPinInput(""); return; }
     setUsuario(u);
     setModalLogin(false);
     setErrorLogin("");
     setPinInput("");
   }
- 
+
   function logout() {
     setUsuario(null);
     setNombreSel("");
@@ -365,7 +378,7 @@ export default function CocinaApp() {
     setTab("solicitar");
     setModalLogin(true);
   }
- 
+
   async function enviarSolicitud(urgente = false) {
     if (Object.keys(carrito).length === 0) return;
     setEnviando(true);
@@ -373,7 +386,7 @@ export default function CocinaApp() {
       .filter(([,v]) => v.cantidad > 0)
       .map(([nombre, v]) => ({nombre, unidad: v.unidad, cantidad: v.cantidad, nota: v.nota || ""}));
     if (items.length === 0) { setEnviando(false); return; }
- 
+
     const sol = {
       usuario_id: usuario.id,
       usuario_nombre: usuario.nombre,
@@ -384,11 +397,10 @@ export default function CocinaApp() {
       estado: "pendiente",
       creado_en: new Date().toISOString(),
     };
- 
+
     const {data, error} = await supabase.from("solicitudes_cocina").insert(sol).select().single();
     if (!error && data) {
       setSolicitudes(s => [data, ...s]);
-      // WhatsApp
       const emoji = urgente ? "🚨 URGENTE 🚨" : "📋 Nueva solicitud";
       let msg = `${emoji}\n\n`;
       msg += `👤 ${usuario.nombre} — ${AREA_EMOJIS[usuario.area]} ${usuario.area}\n`;
@@ -407,12 +419,11 @@ export default function CocinaApp() {
     }
     setEnviando(false);
   }
- 
+
   async function reportarAgotado() {
     if (!prodAgotado) return;
     const msg = `📭 PRODUCTO AGOTADO\n\n👤 ${usuario.nombre} — ${AREA_EMOJIS[usuario.area]} ${usuario.area}\n📦 ${prodAgotado}\n${notaAgotado ? `💬 ${notaAgotado}` : ""}\n📅 ${new Date().toLocaleString("es-MX")}`;
     window.open(`https://wa.me/${TU_NUMERO}?text=${encodeURIComponent(msg)}`, "_blank");
-    // Guardar en solicitudes con tipo especial
     await supabase.from("solicitudes_cocina").insert({
       usuario_id: usuario.id,
       usuario_nombre: usuario.nombre,
@@ -428,21 +439,19 @@ export default function CocinaApp() {
     setProdAgotado("");
     setNotaAgotado("");
   }
- 
+
   async function accionSolicitud(id, estado, cantidades = null, motivo = "") {
     const sol = solicitudes.find(s => s.id === id);
     if (!sol) return;
- 
+
     const updates = {estado, aprobado_por: usuario.nombre, aprobado_en: new Date().toISOString()};
     if (motivo) updates.motivo_rechazo = motivo;
- 
-    // Si se aprueba o ajusta, descontar del inventario
+
     if (estado === "aprobada" || estado === "ajustada") {
       const items = JSON.parse(sol.items);
       for (const item of items) {
         const cantFinal = cantidades ? (cantidades[item.nombre] ?? item.cantidad) : item.cantidad;
         if (cantFinal <= 0) continue;
-        // Buscar en inventario por nombre similar
         const {data: inv} = await supabase
           .from("inventario")
           .select("id,cantidad,nombre")
@@ -467,14 +476,14 @@ export default function CocinaApp() {
       }
       if (cantidades) updates.items_ajustados = JSON.stringify(cantidades);
     }
- 
+
     await supabase.from("solicitudes_cocina").update(updates).eq("id", id);
     setSolicitudes(s => s.map(x => x.id === id ? {...x, ...updates} : x));
     setModalAprobar(null);
     setCantAjuste({});
     setMotivoRechazo("");
   }
- 
+
   async function solicitarNuevoProducto() {
     if (!formNuevoProd.nombre) return;
     const msg = `🆕 SOLICITUD NUEVO PRODUCTO\n\n👤 ${usuario.nombre} — ${AREA_EMOJIS[usuario.area]} ${usuario.area}\n📦 ${formNuevoProd.nombre} (${formNuevoProd.unidad})\n💬 ${formNuevoProd.nota || "Sin nota"}\n📅 ${new Date().toLocaleString("es-MX")}`;
@@ -482,15 +491,104 @@ export default function CocinaApp() {
     setModalNuevoProd(false);
     setFormNuevoProd({nombre:"",unidad:"",nota:""});
   }
- 
+
+  // ===== FUNCIONES PANEL USUARIOS =====
+  function abrirModalNuevoUsuario() {
+    setFormUsuario({nombre:"",pin:"",area:AREAS[0],rol:"trabajador",notas:"",activo:true});
+    setModalUsuario({nuevo:true});
+    setPinVisible(false);
+    setErrorForm("");
+  }
+
+  function abrirModalEditarUsuario(u) {
+    setFormUsuario({
+      nombre: u.nombre || "",
+      pin: u.pin || "",
+      area: u.area || AREAS[0],
+      rol: u.rol || "trabajador",
+      notas: u.notas || "",
+      activo: u.activo !== false,
+    });
+    setModalUsuario(u);
+    setPinVisible(false);
+    setErrorForm("");
+  }
+
+  async function guardarUsuario() {
+    // Validaciones
+    if (!formUsuario.nombre.trim()) { setErrorForm("El nombre es obligatorio"); return; }
+    if (!formUsuario.pin.trim() || formUsuario.pin.length < 4) { setErrorForm("El PIN debe tener al menos 4 dígitos"); return; }
+    if (!/^\d+$/.test(formUsuario.pin)) { setErrorForm("El PIN debe ser solo números"); return; }
+    if (!formUsuario.area) { setErrorForm("Selecciona un área"); return; }
+    
+    // Verificar nombre duplicado
+    const duplicado = usuarios.find(u => 
+      u.nombre.toLowerCase() === formUsuario.nombre.trim().toLowerCase() && 
+      (!modalUsuario.id || u.id !== modalUsuario.id)
+    );
+    if (duplicado) { setErrorForm("Ya existe un usuario con ese nombre"); return; }
+
+    setGuardandoUsuario(true);
+    
+    const datos = {
+      nombre: formUsuario.nombre.trim(),
+      pin: formUsuario.pin.trim(),
+      area: formUsuario.area,
+      rol: formUsuario.rol,
+      notas: formUsuario.notas.trim(),
+      activo: formUsuario.activo,
+    };
+
+    if (modalUsuario.nuevo) {
+      // Generar ID único basado en timestamp + random para evitar colisiones
+      datos.id = Date.now() + Math.floor(Math.random() * 1000);
+      const {data, error} = await supabase.from("usuarios_cocina").insert(datos).select().single();
+      if (error) { setErrorForm("Error al crear: " + error.message); setGuardandoUsuario(false); return; }
+      if (data) setUsuarios(u => [...u, data].sort((a,b) => a.nombre.localeCompare(b.nombre)));
+    } else {
+      const {error} = await supabase.from("usuarios_cocina").update(datos).eq("id", modalUsuario.id);
+      if (error) { setErrorForm("Error al actualizar: " + error.message); setGuardandoUsuario(false); return; }
+      setUsuarios(u => u.map(x => x.id === modalUsuario.id ? {...x, ...datos} : x).sort((a,b) => a.nombre.localeCompare(b.nombre)));
+    }
+
+    setGuardandoUsuario(false);
+    setModalUsuario(null);
+    setPinVisible(false);
+  }
+
+  async function toggleActivoUsuario(u) {
+    if (u.id === usuario.id) { 
+      alert("No puedes desactivarte a ti mismo"); 
+      return; 
+    }
+    const nuevoEstado = !u.activo;
+    const confirmar = window.confirm(`¿${nuevoEstado ? "Activar" : "Desactivar"} a ${u.nombre}?`);
+    if (!confirmar) return;
+    
+    await supabase.from("usuarios_cocina").update({activo: nuevoEstado}).eq("id", u.id);
+    setUsuarios(us => us.map(x => x.id === u.id ? {...x, activo: nuevoEstado} : x));
+    setModalUsuario(null);
+  }
+
   const misSolicitudes = solicitudes.filter(s => s.usuario_id === usuario?.id);
   const todasPendientes = solicitudes.filter(s => s.estado === "pendiente");
- 
+
+  // Usuarios filtrados para el panel
+  const usuariosFiltrados = usuarios.filter(u => {
+    if (!mostrarInactivos && !u.activo) return false;
+    if (filtroAreaUsuarios && u.area !== filtroAreaUsuarios) return false;
+    if (busqUsuarios && !u.nombre.toLowerCase().includes(busqUsuarios.toLowerCase())) return false;
+    return true;
+  });
+
+  const totalActivos = usuarios.filter(u => u.activo).length;
+  const totalInactivos = usuarios.filter(u => !u.activo).length;
+
   const inp = {width:"100%",background:"rgba(7,10,18,0.8)",border:`1px solid ${C.border}`,borderRadius:"10px",padding:"10px 13px",color:C.text,fontFamily:"inherit",fontSize:"14px",outline:"none",boxSizing:"border-box"};
   const btnP = {background:"linear-gradient(135deg,#7dd3fc,#818cf8)",border:"none",color:"#060810",padding:"10px 18px",borderRadius:"10px",cursor:"pointer",fontFamily:"inherit",fontWeight:"700",fontSize:"13px",boxShadow:"0 0 20px rgba(125,211,252,0.2)"};
   const btnG = {background:"rgba(13,17,23,0.8)",border:`1px solid ${C.border}`,color:C.muted,padding:"9px 14px",borderRadius:"10px",cursor:"pointer",fontFamily:"inherit",fontSize:"13px"};
   const lbl = {fontSize:"10px",color:"rgba(125,211,252,0.5)",textTransform:"uppercase",letterSpacing:"2px",display:"block",marginBottom:"5px",fontWeight:"500"};
- 
+
   if (cargando) return (
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",color:C.accent,fontFamily:"'Outfit',sans-serif",fontSize:"16px"}}>
       <div style={{textAlign:"center"}}>
@@ -499,7 +597,7 @@ export default function CocinaApp() {
       </div>
     </div>
   );
- 
+
   return (
     <div style={{minHeight:"100vh",background:`linear-gradient(135deg,${C.bg} 0%,#080d1a 50%,${C.bg} 100%)`,color:C.text,fontFamily:"'Outfit','Segoe UI',sans-serif"}}>
       <style>{`
@@ -513,7 +611,7 @@ export default function CocinaApp() {
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
         .pulse{animation:pulse 2s ease-in-out infinite}
       `}</style>
- 
+
       {/* ===== LOGIN ===== */}
       {modalLogin && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,5,15,0.97)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
@@ -521,13 +619,13 @@ export default function CocinaApp() {
             <div style={{fontSize:"48px",marginBottom:"8px"}}>🧇</div>
             <div style={{fontWeight:"800",fontSize:"22px",color:C.accent,marginBottom:"4px"}}>Cocina Waffleland</div>
             <div style={{fontSize:"13px",color:C.muted,marginBottom:"28px"}}>Identifícate para continuar</div>
- 
+
             <select value={nombreSel} onChange={e=>{setNombreSel(e.target.value);setPinInput("");setErrorLogin("");}}
               style={{...inp,marginBottom:"10px",cursor:"pointer",textAlign:"center"}}>
               <option value="">Selecciona tu nombre...</option>
-              {usuarios.map(u=><option key={u.id} value={u.nombre}>{AREA_EMOJIS[u.area]||"👤"} {u.nombre} — {u.area}</option>)}
+              {usuarios.filter(u => u.activo).map(u=><option key={u.id} value={u.nombre}>{AREA_EMOJIS[u.area]||"👤"} {u.nombre} — {u.area}</option>)}
             </select>
- 
+
             {nombreSel && (
               <input type="password" placeholder="Tu PIN..." value={pinInput}
                 onChange={e=>{setPinInput(e.target.value);setErrorLogin("");}}
@@ -536,9 +634,9 @@ export default function CocinaApp() {
                 autoFocus
               />
             )}
- 
+
             {errorLogin && <div style={{color:C.danger,fontSize:"12px",marginBottom:"8px"}}>{errorLogin}</div>}
- 
+
             <button onClick={login} disabled={!nombreSel||!pinInput}
               style={{...btnP,width:"100%",opacity:nombreSel&&pinInput?1:0.4,marginTop:"8px"}}>
               Entrar
@@ -546,7 +644,7 @@ export default function CocinaApp() {
           </div>
         </div>
       )}
- 
+
       {/* ===== TOP BAR ===== */}
       {usuario && (
         <>
@@ -556,11 +654,11 @@ export default function CocinaApp() {
               <div style={{fontSize:"24px"}}>{AREA_EMOJIS[usuario.area]}</div>
               <div>
                 <div style={{fontWeight:"800",fontSize:"14px",color:C.accent}}>{usuario.nombre}</div>
-                <div style={{fontSize:"10px",color:C.muted}}>{usuario.area}</div>
+                <div style={{fontSize:"10px",color:C.muted}}>{usuario.area} · {usuario.rol}</div>
               </div>
             </div>
             <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
-              {todasPendientes.length>0&&esAdmin&&(
+              {todasPendientes.length>0&&esGerenteOAdmin&&(
                 <div style={{background:"#f8717120",border:"1px solid #f8717140",borderRadius:"6px",padding:"3px 8px",fontSize:"10px",color:C.danger,fontWeight:"700"}} className="pulse">
                   {todasPendientes.length} pendiente{todasPendientes.length!==1?"s":""}
                 </div>
@@ -570,20 +668,21 @@ export default function CocinaApp() {
             </div>
           </div>
         </div>
- 
+
         {/* ===== TABS ===== */}
         <div style={{background:"rgba(6,8,16,0.95)",backdropFilter:"blur(20px)",borderBottom:`1px solid ${C.border}`,display:"flex",overflowX:"auto"}}>
           {[
             {id:"solicitar",label:"📋 Solicitar"},
             {id:"pendientes",label:`⏳ Mis pedidos${misSolicitudes.filter(s=>s.estado==="pendiente").length>0?" ("+misSolicitudes.filter(s=>s.estado==="pendiente").length+")":""}`},
-            ...(esAdmin?[{id:"aprobar",label:`✅ Aprobar${todasPendientes.length>0?" ("+todasPendientes.length+")":""}`},{id:"historial",label:"📊 Historial"}]:[]),
+            ...(esGerenteOAdmin?[{id:"aprobar",label:`✅ Aprobar${todasPendientes.length>0?" ("+todasPendientes.length+")":""}`},{id:"historial",label:"📊 Historial"}]:[]),
+            ...(esAdmin?[{id:"usuarios",label:"👥 Usuarios"}]:[]),
           ].map(t=>(
             <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"10px 14px",border:"none",background:"transparent",color:tab===t.id?C.accent:C.muted,cursor:"pointer",fontFamily:"inherit",fontWeight:tab===t.id?"700":"400",fontSize:"12px",whiteSpace:"nowrap",borderBottom:tab===t.id?`2px solid ${C.accent}`:"2px solid transparent",textShadow:tab===t.id?"0 0 10px rgba(125,211,252,0.5)":"none"}}>
               {t.label}
             </button>
           ))}
         </div>
- 
+
         {/* ===== SOLICITAR ===== */}
         {tab==="solicitar"&&(
           <div style={{padding:"16px 16px 120px"}}>
@@ -592,7 +691,7 @@ export default function CocinaApp() {
                 style={{...inp,flex:1}}/>
               <button onClick={()=>setModalNuevoProd(true)} style={{...btnG,fontSize:"12px",padding:"9px 12px",color:C.info,borderColor:"rgba(129,140,248,0.3)",whiteSpace:"nowrap"}}>+ Nuevo</button>
             </div>
- 
+
             <div style={{display:"grid",gap:"8px",marginBottom:"16px"}}>
               {productosFiltrados.map(p=>{
                 const qty = carrito[p.nombre]?.cantidad || 0;
@@ -624,7 +723,7 @@ export default function CocinaApp() {
             </div>
           </div>
         )}
- 
+
         {/* ===== PENDIENTES ===== */}
         {tab==="pendientes"&&(
           <div style={{padding:"16px 16px 40px"}}>
@@ -657,9 +756,9 @@ export default function CocinaApp() {
             })}
           </div>
         )}
- 
+
         {/* ===== APROBAR (Admin/Gerente) ===== */}
-        {tab==="aprobar"&&esAdmin&&(
+        {tab==="aprobar"&&esGerenteOAdmin&&(
           <div style={{padding:"16px 16px 40px"}}>
             <div style={{fontWeight:"700",fontSize:"15px",marginBottom:"4px"}}>Solicitudes Pendientes</div>
             <div style={{fontSize:"11px",color:C.muted,marginBottom:"16px"}}>Aprueba, ajusta o rechaza cada solicitud</div>
@@ -690,9 +789,9 @@ export default function CocinaApp() {
             })}
           </div>
         )}
- 
-        {/* ===== HISTORIAL (Admin) ===== */}
-        {tab==="historial"&&esAdmin&&(
+
+        {/* ===== HISTORIAL (Admin/Gerente) ===== */}
+        {tab==="historial"&&esGerenteOAdmin&&(
           <div style={{padding:"16px 16px 40px"}}>
             <div style={{fontWeight:"700",fontSize:"15px",marginBottom:"4px"}}>Historial Completo</div>
             <div style={{fontSize:"11px",color:C.muted,marginBottom:"16px"}}>Todas las solicitudes del equipo</div>
@@ -715,7 +814,60 @@ export default function CocinaApp() {
             })}
           </div>
         )}
- 
+
+        {/* ===== PANEL USUARIOS (Solo Admin) ===== */}
+        {tab==="usuarios"&&esAdmin&&(
+          <div style={{padding:"16px 16px 40px"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"14px",flexWrap:"wrap",gap:"8px"}}>
+              <div>
+                <div style={{fontWeight:"700",fontSize:"15px"}}>Gestión de Usuarios</div>
+                <div style={{fontSize:"11px",color:C.muted}}>
+                  <span style={{color:C.success,fontWeight:"600"}}>{totalActivos} activo{totalActivos!==1?"s":""}</span>
+                  {totalInactivos>0&&<> · <span style={{color:C.muted}}>{totalInactivos} inactivo{totalInactivos!==1?"s":""}</span></>}
+                </div>
+              </div>
+              <button onClick={abrirModalNuevoUsuario} style={{...btnP,fontSize:"12px",padding:"8px 14px"}}>+ Agregar usuario</button>
+            </div>
+
+            {/* Filtros */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:"8px",marginBottom:"10px"}}>
+              <input placeholder="🔍 Buscar por nombre..." value={busqUsuarios} onChange={e=>setBusqUsuarios(e.target.value)} style={{...inp,fontSize:"13px"}}/>
+              <select value={filtroAreaUsuarios} onChange={e=>setFiltroAreaUsuarios(e.target.value)} style={{...inp,fontSize:"13px",cursor:"pointer",width:"auto",minWidth:"140px"}}>
+                <option value="">Todas las áreas</option>
+                {AREAS.map(a=><option key={a} value={a}>{AREA_EMOJIS[a]} {a}</option>)}
+              </select>
+            </div>
+
+            <label style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"12px",color:C.muted,marginBottom:"16px",cursor:"pointer"}}>
+              <input type="checkbox" checked={mostrarInactivos} onChange={e=>setMostrarInactivos(e.target.checked)} style={{cursor:"pointer"}}/>
+              Mostrar usuarios inactivos
+            </label>
+
+            {/* Lista de usuarios */}
+            {usuariosFiltrados.length===0?(
+              <div style={{textAlign:"center",color:C.muted,padding:"40px 20px",fontSize:"13px"}}>No hay usuarios que coincidan</div>
+            ):usuariosFiltrados.map(u=>(
+              <div key={u.id} style={{background:"rgba(13,17,23,0.8)",border:`1px solid ${u.activo?C.border:"rgba(248,113,113,0.2)"}`,borderRadius:"12px",padding:"12px 14px",marginBottom:"8px",opacity:u.activo?1:0.6}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"10px",marginBottom:u.notas?"6px":0}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"10px",flex:1,minWidth:0}}>
+                    <div style={{fontSize:"22px"}}>{AREA_EMOJIS[u.area]||"👤"}</div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}}>
+                        <div style={{fontWeight:"700",fontSize:"13px"}}>{u.nombre}</div>
+                        {!u.activo&&<span style={{fontSize:"9px",color:C.danger,background:"rgba(248,113,113,0.15)",padding:"1px 6px",borderRadius:"4px",fontWeight:"700"}}>INACTIVO</span>}
+                        {u.id===usuario.id&&<span style={{fontSize:"9px",color:C.accent,background:"rgba(125,211,252,0.15)",padding:"1px 6px",borderRadius:"4px",fontWeight:"700"}}>TÚ</span>}
+                      </div>
+                      <div style={{fontSize:"10px",color:C.muted}}>{u.area} · <span style={{textTransform:"capitalize",color:u.rol==="admin"?C.accent:u.rol==="gerente"?C.info:C.muted}}>{u.rol}</span> · PIN: ••••</div>
+                    </div>
+                  </div>
+                  <button onClick={()=>abrirModalEditarUsuario(u)} style={{...btnG,fontSize:"11px",padding:"6px 10px"}}>Editar</button>
+                </div>
+                {u.notas&&<div style={{fontSize:"11px",color:C.muted,fontStyle:"italic",paddingLeft:"32px",borderLeft:`2px solid ${C.border}`,marginLeft:"4px"}}>📝 {u.notas}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* ===== BOTTOM BAR SOLICITAR ===== */}
         {tab==="solicitar"&&(
           <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(6,8,16,0.97)",backdropFilter:"blur(20px)",borderTop:`1px solid ${C.border}`,padding:"12px 16px 20px"}}>
@@ -738,7 +890,7 @@ export default function CocinaApp() {
             </div>
           </div>
         )}
- 
+
         {/* ===== MODAL APROBAR ===== */}
         {modalAprobar&&(
           <div style={{position:"fixed",inset:0,background:"rgba(0,5,15,0.9)",backdropFilter:"blur(8px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
@@ -761,12 +913,12 @@ export default function CocinaApp() {
                   </div>
                 ))}
               </div>
- 
+
               <div style={{marginBottom:"12px"}}>
                 <label style={lbl}>Motivo rechazo (si aplica)</label>
                 <input placeholder="Ej. No hay stock, fuera de horario..." value={motivoRechazo} onChange={e=>setMotivoRechazo(e.target.value)} style={inp}/>
               </div>
- 
+
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"8px"}}>
                 <button onClick={()=>accionSolicitud(modalAprobar.id,"aprobada",cantAjuste)}
                   style={{...btnP,background:"linear-gradient(135deg,#34d399,#059669)"}}>✅ Aprobar</button>
@@ -786,7 +938,7 @@ export default function CocinaApp() {
             </div>
           </div>
         )}
- 
+
         {/* ===== MODAL AGOTADO ===== */}
         {modalAgotado&&(
           <div style={{position:"fixed",inset:0,background:"rgba(0,5,15,0.9)",backdropFilter:"blur(8px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
@@ -810,7 +962,7 @@ export default function CocinaApp() {
             </div>
           </div>
         )}
- 
+
         {/* ===== MODAL NUEVO PRODUCTO ===== */}
         {modalNuevoProd&&(
           <div style={{position:"fixed",inset:0,background:"rgba(0,5,15,0.9)",backdropFilter:"blur(8px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
@@ -838,7 +990,92 @@ export default function CocinaApp() {
             </div>
           </div>
         )}
- 
+
+        {/* ===== MODAL GESTIONAR USUARIO (Admin) ===== */}
+        {modalUsuario&&(
+          <div style={{position:"fixed",inset:0,background:"rgba(0,5,15,0.9)",backdropFilter:"blur(8px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
+            <div style={{background:"rgba(8,12,22,0.98)",border:`1px solid ${C.border}`,borderRadius:"16px",padding:"20px",width:"100%",maxWidth:"420px",maxHeight:"90vh",overflowY:"auto",boxShadow:"0 0 40px rgba(125,211,252,0.1)"}}>
+              <div style={{fontWeight:"800",fontSize:"16px",color:C.accent,marginBottom:"4px"}}>
+                {modalUsuario.nuevo?"➕ Nuevo usuario":"✏️ Editar usuario"}
+              </div>
+              <div style={{fontSize:"12px",color:C.muted,marginBottom:"16px"}}>
+                {modalUsuario.nuevo?"Completa los datos del nuevo trabajador":`Modificar a ${modalUsuario.nombre}`}
+              </div>
+
+              <div style={{marginBottom:"10px"}}>
+                <label style={lbl}>Nombre completo *</label>
+                <input placeholder="Ej. Juan Pérez..." value={formUsuario.nombre} onChange={e=>{setFormUsuario(f=>({...f,nombre:e.target.value}));setErrorForm("");}} style={inp}/>
+              </div>
+
+              <div style={{marginBottom:"10px"}}>
+                <label style={lbl}>PIN (mínimo 4 dígitos) *</label>
+                <div style={{display:"flex",gap:"6px"}}>
+                  <input 
+                    type={pinVisible?"text":"password"}
+                    placeholder="Ej. 1234..." 
+                    value={formUsuario.pin} 
+                    onChange={e=>{setFormUsuario(f=>({...f,pin:e.target.value.replace(/\D/g,"")}));setErrorForm("");}}
+                    style={{...inp,letterSpacing:pinVisible?"normal":"6px",fontSize:"16px",textAlign:"center"}}
+                    maxLength="8"
+                  />
+                  <button type="button" onClick={()=>setPinVisible(v=>!v)} style={{...btnG,padding:"0 12px",minWidth:"50px"}}>
+                    {pinVisible?"🙈":"👁️"}
+                  </button>
+                </div>
+              </div>
+
+              <div style={{marginBottom:"10px"}}>
+                <label style={lbl}>Área *</label>
+                <select value={formUsuario.area} onChange={e=>{setFormUsuario(f=>({...f,area:e.target.value}));setErrorForm("");}} style={{...inp,cursor:"pointer"}}>
+                  {AREAS.map(a=><option key={a} value={a}>{AREA_EMOJIS[a]} {a}</option>)}
+                </select>
+              </div>
+
+              <div style={{marginBottom:"10px"}}>
+                <label style={lbl}>Rol *</label>
+                <select value={formUsuario.rol} onChange={e=>setFormUsuario(f=>({...f,rol:e.target.value}))} style={{...inp,cursor:"pointer",textTransform:"capitalize"}}>
+                  {ROLES.map(r=><option key={r} value={r} style={{textTransform:"capitalize"}}>{r}</option>)}
+                </select>
+                <div style={{fontSize:"10px",color:C.muted,marginTop:"4px"}}>
+                  {formUsuario.rol==="trabajador"&&"Solo puede solicitar productos"}
+                  {formUsuario.rol==="subgerente"&&"Puede solicitar productos"}
+                  {formUsuario.rol==="gerente"&&"Puede solicitar, aprobar y ver historial"}
+                  {formUsuario.rol==="admin"&&"Acceso total + gestión de usuarios"}
+                </div>
+              </div>
+
+              <div style={{marginBottom:"16px"}}>
+                <label style={lbl}>Notas (opcional)</label>
+                <textarea 
+                  placeholder="Ej. Solo trabaja fines de semana, encargado de cierre..." 
+                  value={formUsuario.notas} 
+                  onChange={e=>setFormUsuario(f=>({...f,notas:e.target.value}))}
+                  rows="3"
+                  style={{...inp,resize:"vertical",fontFamily:"inherit"}}
+                />
+              </div>
+
+              {errorForm&&<div style={{color:C.danger,fontSize:"12px",marginBottom:"12px",padding:"8px 10px",background:"rgba(248,113,113,0.1)",border:"1px solid rgba(248,113,113,0.2)",borderRadius:"8px"}}>⚠️ {errorForm}</div>}
+
+              {!modalUsuario.nuevo&&modalUsuario.id!==usuario.id&&(
+                <button 
+                  onClick={()=>toggleActivoUsuario(modalUsuario)}
+                  style={{...btnG,width:"100%",marginBottom:"8px",color:modalUsuario.activo?C.danger:C.success,borderColor:modalUsuario.activo?"rgba(248,113,113,0.3)":"rgba(52,211,153,0.3)",textAlign:"center"}}
+                >
+                  {modalUsuario.activo?"🚫 Desactivar usuario":"✅ Reactivar usuario"}
+                </button>
+              )}
+
+              <div style={{display:"flex",gap:"8px"}}>
+                <button onClick={()=>{setModalUsuario(null);setPinVisible(false);setErrorForm("");}} style={{...btnG,flex:1,textAlign:"center"}}>Cancelar</button>
+                <button onClick={guardarUsuario} disabled={guardandoUsuario} style={{...btnP,flex:2,opacity:guardandoUsuario?0.6:1}}>
+                  {guardandoUsuario?"Guardando...":modalUsuario.nuevo?"➕ Crear usuario":"💾 Guardar cambios"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         </>
       )}
     </div>
