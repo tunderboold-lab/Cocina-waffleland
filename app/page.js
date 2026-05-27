@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
  
 const supabase = createClient(
   "https://auweubelcxsvkifyibfw.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1d2V1YmVsY3hzdmtpZnlpYmZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDYxMzYzMTgsImV4cCI6MjAyMTcxMjMxOH0.dMXJSiTFMrRZzuvMBzb9TMXL6JMI7a4nmBnQ3yd98L4"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1d2V1YmVsY3hzdmtpZnlpYmZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTk5MTYsImV4cCI6MjA5NDMzNTkxNn0.NLV2t1haEXKM-n8iyVpzCU9gx-CmTMPVJjmM0ZDlsXM"
 );
  
 const TU_NUMERO = "5215544690495";
