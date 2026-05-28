@@ -289,6 +289,18 @@ const AREA_EMOJIS = {
 
 const ROLES = ["trabajador", "subgerente", "gerente", "admin"];
 
+// Productos que requieren registrar cuántos gramos se sirvieron del bote.
+// Formato: "Area||Nombre del producto"
+const PRODUCTOS_RELLENABLES = [
+  "Crepas||Cajeta",
+  "Crepas||Mermelada de fresa",
+  "Crepas||Mermelada de zarzamora",
+  "Crepas||Hershey's líquido",
+];
+function esRellenable(area, nombre) {
+  return PRODUCTOS_RELLENABLES.includes(area + "||" + nombre);
+}
+
 const ESTADOS = {
   pendiente: {label:"⏳ Pendiente", color:"#fbbf24", bg:"#fbbf2415"},
   aprobada: {label:"✅ Aprobada", color:"#34d399", bg:"#34d39915"},
@@ -327,6 +339,9 @@ export default function CocinaApp() {
   const [modalNuevoProd, setModalNuevoProd] = useState(false);
   const [formNuevoProd, setFormNuevoProd] = useState({nombre:"",unidad:"",nota:""});
 
+  // ===== ESTADO SUBPESTAÑA ÁREA (multi-área) =====
+  const [areaActiva, setAreaActiva] = useState("");
+
   // ===== ESTADOS PANEL USUARIOS =====
   const [busqUsuarios, setBusqUsuarios] = useState("");
   const [filtroAreaUsuarios, setFiltroAreaUsuarios] = useState("");
@@ -339,7 +354,13 @@ export default function CocinaApp() {
 
   const esAdmin = usuario?.rol === "admin";
   const esGerenteOAdmin = usuario?.rol === "admin" || usuario?.rol === "gerente";
-  const productosArea = usuario ? (PRODUCTOS_AREA[usuario.area] || []) : [];
+  // Roles que ven TODAS las áreas (en subpestañas) y auto-aprueban
+  const esMultiArea = usuario?.rol === "admin" || usuario?.rol === "gerente" || usuario?.rol === "subgerente";
+  // Roles que pueden gestionar usuarios (admin y gerente)
+  const puedeGestionarUsuarios = usuario?.rol === "admin" || usuario?.rol === "gerente";
+  // Área que se está mostrando en la pestaña Solicitar
+  const areaMostrada = esMultiArea ? (areaActiva || usuario?.area || AREAS[0]) : usuario?.area;
+  const productosArea = areaMostrada ? (PRODUCTOS_AREA[areaMostrada] || []) : [];
   const productosFiltrados = productosArea.filter(p =>
     !busq || p.nombre.toLowerCase().includes(busq.toLowerCase())
   );
@@ -364,6 +385,7 @@ export default function CocinaApp() {
     if (!u) { setErrorLogin("Usuario no encontrado o inactivo"); return; }
     if (u.pin !== pinInput) { setErrorLogin("PIN incorrecto"); setPinInput(""); return; }
     setUsuario(u);
+    setAreaActiva(u.area || AREAS[0]);
     setModalLogin(false);
     setErrorLogin("");
     setPinInput("");
@@ -381,11 +403,30 @@ export default function CocinaApp() {
 
   async function enviarSolicitud(urgente = false) {
     if (Object.keys(carrito).length === 0) return;
+
+    // Validar gramos en productos rellenables antes de enviar
+    const faltaGramos = Object.values(carrito).find(v =>
+      v.cantidad > 0 && esRellenable(v.area || usuario.area, v.nombre) && (!v.gramos || +v.gramos <= 0)
+    );
+    if (faltaGramos) {
+      alert(`Falta indicar los gramos servidos de "${faltaGramos.nombre}". Es obligatorio para llevar el control del bote.`);
+      return;
+    }
+
     setEnviando(true);
-    const items = Object.entries(carrito)
-      .filter(([,v]) => v.cantidad > 0)
-      .map(([nombre, v]) => ({nombre, unidad: v.unidad, cantidad: v.cantidad, nota: v.nota || ""}));
+    // Cada item del carrito ya trae su area (para multi-área)
+    const items = Object.values(carrito)
+      .filter(v => v.cantidad > 0)
+      .map(v => {
+        const item = {nombre: v.nombre, unidad: v.unidad, cantidad: v.cantidad, nota: v.nota || "", area: v.area || usuario.area};
+        if (esRellenable(item.area, item.nombre) && v.gramos) item.gramos = +v.gramos;
+        return item;
+      });
     if (items.length === 0) { setEnviando(false); return; }
+
+    // Auto-aprobación con registro (Opción D): admin/gerente/subgerente aprueban solos
+    const autoAprobar = esMultiArea;
+    const ahora = new Date().toISOString();
 
     const sol = {
       usuario_id: usuario.id,
@@ -394,22 +435,38 @@ export default function CocinaApp() {
       items: JSON.stringify(items),
       nota_general: notaGeneral,
       urgente,
-      estado: "pendiente",
-      creado_en: new Date().toISOString(),
+      estado: autoAprobar ? "aprobada" : "pendiente",
+      creado_en: ahora,
     };
+    if (autoAprobar) {
+      sol.aprobado_por = `${usuario.nombre} (auto · ${usuario.rol})`;
+      sol.aprobado_en = ahora;
+    }
 
     const {data, error} = await supabase.from("solicitudes_cocina").insert(sol).select().single();
     if (!error && data) {
       setSolicitudes(s => [data, ...s]);
+      // Agrupar productos por área para el mensaje
+      const porArea = {};
+      items.forEach(i => {
+        if (!porArea[i.area]) porArea[i.area] = [];
+        porArea[i.area].push(i);
+      });
+
       const emoji = urgente ? "🚨 URGENTE 🚨" : "📋 Nueva solicitud";
       let msg = `${emoji}\n\n`;
-      msg += `👤 ${usuario.nombre} — ${AREA_EMOJIS[usuario.area]} ${usuario.area}\n`;
-      msg += `📅 ${new Date().toLocaleString("es-MX")}\n\n`;
-      msg += `📦 PRODUCTOS:\n`;
-      items.forEach(i => {
-        msg += `• ${i.nombre}: ${i.cantidad} ${i.unidad}`;
-        if (i.nota) msg += ` (${i.nota})`;
-        msg += "\n";
+      msg += `👤 ${usuario.nombre} — ${usuario.rol}\n`;
+      msg += `📅 ${new Date().toLocaleString("es-MX")}\n`;
+      if (autoAprobar) msg += `✅ Auto-aprobada\n`;
+      msg += `\n📦 PRODUCTOS:\n`;
+      Object.entries(porArea).forEach(([area, prods]) => {
+        msg += `\n${AREA_EMOJIS[area]||""} ${area.toUpperCase()}:\n`;
+        prods.forEach(i => {
+          msg += `• ${i.nombre}: ${i.cantidad} ${i.unidad}`;
+          if (i.gramos) msg += ` (⚖️ ${i.gramos} gr servidos)`;
+          if (i.nota) msg += ` (${i.nota})`;
+          msg += "\n";
+        });
       });
       if (notaGeneral) msg += `\n💬 Nota: ${notaGeneral}`;
       window.open(`https://wa.me/${TU_NUMERO}?text=${encodeURIComponent(msg)}`, "_blank");
@@ -675,7 +732,7 @@ export default function CocinaApp() {
             {id:"solicitar",label:"📋 Solicitar"},
             {id:"pendientes",label:`⏳ Mis pedidos${misSolicitudes.filter(s=>s.estado==="pendiente").length>0?" ("+misSolicitudes.filter(s=>s.estado==="pendiente").length+")":""}`},
             ...(esGerenteOAdmin?[{id:"aprobar",label:`✅ Aprobar${todasPendientes.length>0?" ("+todasPendientes.length+")":""}`},{id:"historial",label:"📊 Historial"}]:[]),
-            ...(esAdmin?[{id:"usuarios",label:"👥 Usuarios"}]:[]),
+            ...(puedeGestionarUsuarios?[{id:"usuarios",label:"👥 Usuarios"}]:[]),
           ].map(t=>(
             <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"10px 14px",border:"none",background:"transparent",color:tab===t.id?C.accent:C.muted,cursor:"pointer",fontFamily:"inherit",fontWeight:tab===t.id?"700":"400",fontSize:"12px",whiteSpace:"nowrap",borderBottom:tab===t.id?`2px solid ${C.accent}`:"2px solid transparent",textShadow:tab===t.id?"0 0 10px rgba(125,211,252,0.5)":"none"}}>
               {t.label}
@@ -686,35 +743,71 @@ export default function CocinaApp() {
         {/* ===== SOLICITAR ===== */}
         {tab==="solicitar"&&(
           <div style={{padding:"16px 16px 120px"}}>
+            {/* Subpestañas de área (solo multi-área) */}
+            {esMultiArea&&(
+              <div style={{display:"flex",gap:"6px",overflowX:"auto",marginBottom:"12px",paddingBottom:"4px"}}>
+                {AREAS.map(a=>{
+                  const itemsArea = Object.values(carrito).filter(v=>v.area===a&&v.cantidad>0).length;
+                  const activa = areaMostrada===a;
+                  return(
+                    <button key={a} onClick={()=>{setAreaActiva(a);setBusq("");}}
+                      style={{padding:"7px 12px",borderRadius:"10px",border:`1px solid ${activa?"rgba(125,211,252,0.4)":C.border}`,background:activa?"rgba(125,211,252,0.15)":"rgba(13,17,23,0.8)",color:activa?C.accent:C.muted,cursor:"pointer",fontFamily:"inherit",fontSize:"12px",fontWeight:activa?"700":"400",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:"5px"}}>
+                      {AREA_EMOJIS[a]} {a}
+                      {itemsArea>0&&<span style={{background:C.accent,color:C.bg,borderRadius:"10px",padding:"0px 6px",fontSize:"10px",fontWeight:"700"}}>{itemsArea}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <div style={{display:"flex",gap:"8px",marginBottom:"14px"}}>
               <input placeholder="🔍 Buscar producto..." value={busq} onChange={e=>setBusq(e.target.value)}
                 style={{...inp,flex:1}}/>
               <button onClick={()=>setModalNuevoProd(true)} style={{...btnG,fontSize:"12px",padding:"9px 12px",color:C.info,borderColor:"rgba(129,140,248,0.3)",whiteSpace:"nowrap"}}>+ Nuevo</button>
             </div>
 
+            {esMultiArea&&(
+              <div style={{fontSize:"11px",color:C.muted,marginBottom:"10px"}}>
+                Mostrando productos de <span style={{color:C.accent,fontWeight:"600"}}>{AREA_EMOJIS[areaMostrada]} {areaMostrada}</span>
+              </div>
+            )}
+
             <div style={{display:"grid",gap:"8px",marginBottom:"16px"}}>
               {productosFiltrados.map(p=>{
-                const qty = carrito[p.nombre]?.cantidad || 0;
+                const key = areaMostrada + "||" + p.nombre;
+                const qty = carrito[key]?.cantidad || 0;
                 return(
-                  <div key={p.nombre} style={{background:"rgba(13,17,23,0.8)",border:`1px solid ${qty>0?"rgba(125,211,252,0.3)":C.border}`,borderRadius:"12px",padding:"12px 14px",backdropFilter:"blur(10px)"}}>
+                  <div key={key} style={{background:"rgba(13,17,23,0.8)",border:`1px solid ${qty>0?"rgba(125,211,252,0.3)":C.border}`,borderRadius:"12px",padding:"12px 14px",backdropFilter:"blur(10px)"}}>
                     <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
                       <div style={{flex:1}}>
                         <div style={{fontSize:"13px",fontWeight:"600"}}>{p.nombre}</div>
                         <div style={{fontSize:"10px",color:C.muted}}>Óptimo: {p.optimo} {p.unidad}</div>
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                        <button onClick={()=>setCarrito(c=>({...c,[p.nombre]:{...c[p.nombre],unidad:p.unidad,cantidad:Math.max(0,(c[p.nombre]?.cantidad||0)-1)}}))}
+                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,area:areaMostrada,unidad:p.unidad,cantidad:Math.max(0,(c[key]?.cantidad||0)-1)}}))}
                           style={{background:"rgba(248,113,113,0.2)",border:"none",color:C.danger,width:"28px",height:"28px",borderRadius:"7px",cursor:"pointer",fontSize:"16px",fontWeight:"700"}}>−</button>
                         <div style={{background:qty>0?"rgba(125,211,252,0.15)":"rgba(255,255,255,0.05)",border:`1px solid ${qty>0?"rgba(125,211,252,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:"8px",padding:"4px 10px",fontFamily:"'JetBrains Mono',monospace",fontWeight:"600",color:qty>0?C.accent:C.muted,fontSize:"13px",minWidth:"64px",textAlign:"center"}}>
                           {qty} {p.unidad}
                         </div>
-                        <button onClick={()=>setCarrito(c=>({...c,[p.nombre]:{...c[p.nombre],unidad:p.unidad,cantidad:(c[p.nombre]?.cantidad||0)+1}}))}
+                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,area:areaMostrada,unidad:p.unidad,cantidad:(c[key]?.cantidad||0)+1}}))}
                           style={{background:"rgba(52,211,153,0.2)",border:"none",color:C.success,width:"28px",height:"28px",borderRadius:"7px",cursor:"pointer",fontSize:"16px",fontWeight:"700"}}>+</button>
                       </div>
                     </div>
+                    {qty>0&&esRellenable(areaMostrada,p.nombre)&&(
+                      <div style={{marginTop:"8px",background:"rgba(251,191,36,0.08)",border:`1px solid ${(carrito[key]?.gramos&&+carrito[key].gramos>0)?"rgba(251,191,36,0.3)":"rgba(251,191,36,0.5)"}`,borderRadius:"8px",padding:"8px 10px"}}>
+                        <div style={{fontSize:"10px",color:C.warn,fontWeight:"600",marginBottom:"5px"}}>⚖️ ¿Cuántos gramos agarraste del bote? *</div>
+                        <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                          <input type="number" min="0" inputMode="numeric" placeholder="Ej. 350"
+                            value={carrito[key]?.gramos||""}
+                            onChange={e=>setCarrito(c=>({...c,[key]:{...c[key],gramos:e.target.value.replace(/\D/g,"")}}))}
+                            style={{...inp,fontSize:"13px",padding:"6px 10px",fontFamily:"'JetBrains Mono',monospace",textAlign:"center"}}/>
+                          <span style={{fontSize:"12px",color:C.muted,minWidth:"34px"}}>gr</span>
+                        </div>
+                      </div>
+                    )}
                     {qty>0&&(
-                      <input placeholder="Nota (opcional)..." value={carrito[p.nombre]?.nota||""}
-                        onChange={e=>setCarrito(c=>({...c,[p.nombre]:{...c[p.nombre],nota:e.target.value}}))}
+                      <input placeholder="Nota (opcional)..." value={carrito[key]?.nota||""}
+                        onChange={e=>setCarrito(c=>({...c,[key]:{...c[key],nota:e.target.value}}))}
                         style={{...inp,marginTop:"8px",fontSize:"11px",padding:"6px 10px",color:C.muted}}/>
                     )}
                   </div>
@@ -745,7 +838,7 @@ export default function CocinaApp() {
                   </div>
                   {items.map((i,idx)=>(
                     <div key={idx} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:`1px solid ${C.border}`,fontSize:"12px"}}>
-                      <span>{i.nombre}</span>
+                      <span>{i.area&&i.area!==s.area?`${AREA_EMOJIS[i.area]||""} `:""}{i.nombre}{i.gramos?<span style={{color:C.warn,fontSize:"10px"}}> ⚖️{i.gramos}gr</span>:null}</span>
                       <span style={{fontFamily:"'JetBrains Mono',monospace",color:C.accent}}>{i.cantidad} {i.unidad}</span>
                     </div>
                   ))}
@@ -779,7 +872,7 @@ export default function CocinaApp() {
                   </div>
                   {items.map((i,idx)=>(
                     <div key={idx} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:`1px solid ${C.border}`,fontSize:"12px"}}>
-                      <span>{i.nombre}</span>
+                      <span>{i.area&&i.area!==s.area?`${AREA_EMOJIS[i.area]||""} `:""}{i.nombre}{i.gramos?<span style={{color:C.warn,fontSize:"10px"}}> ⚖️{i.gramos}gr</span>:null}</span>
                       <span style={{fontFamily:"'JetBrains Mono',monospace",color:C.accent}}>{i.cantidad} {i.unidad}</span>
                     </div>
                   ))}
@@ -807,7 +900,7 @@ export default function CocinaApp() {
                     </div>
                     <div style={{background:est.bg,border:`1px solid ${est.color}40`,borderRadius:"6px",padding:"2px 8px",fontSize:"10px",fontWeight:"700",color:est.color}}>{est.label}</div>
                   </div>
-                  <div style={{fontSize:"11px",color:C.muted}}>{items.map(i=>`${i.nombre} (${i.cantidad} ${i.unidad})`).join(" · ")}</div>
+                  <div style={{fontSize:"11px",color:C.muted}}>{items.map(i=>`${i.nombre} (${i.cantidad} ${i.unidad}${i.gramos?` ⚖️${i.gramos}gr`:""})`).join(" · ")}</div>
                   {s.aprobado_por&&<div style={{fontSize:"10px",color:C.muted,marginTop:"4px"}}>Por: {s.aprobado_por}</div>}
                 </div>
               );
@@ -815,8 +908,8 @@ export default function CocinaApp() {
           </div>
         )}
 
-        {/* ===== PANEL USUARIOS (Solo Admin) ===== */}
-        {tab==="usuarios"&&esAdmin&&(
+        {/* ===== PANEL USUARIOS (Admin y Gerente) ===== */}
+        {tab==="usuarios"&&puedeGestionarUsuarios&&(
           <div style={{padding:"16px 16px 40px"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"14px",flexWrap:"wrap",gap:"8px"}}>
               <div>
@@ -874,6 +967,10 @@ export default function CocinaApp() {
             {Object.values(carrito).some(v=>v.cantidad>0)&&(
               <div style={{fontSize:"11px",color:C.muted,marginBottom:"8px"}}>
                 {Object.values(carrito).filter(v=>v.cantidad>0).length} producto(s) en tu solicitud
+                {esMultiArea&&(()=>{
+                  const areasConItems=[...new Set(Object.values(carrito).filter(v=>v.cantidad>0).map(v=>v.area))];
+                  return areasConItems.length>1?` · ${areasConItems.length} áreas`:"";
+                })()}
               </div>
             )}
             <input placeholder="💬 Nota general (opcional)..." value={notaGeneral} onChange={e=>setNotaGeneral(e.target.value)}
@@ -902,8 +999,9 @@ export default function CocinaApp() {
                 {JSON.parse(modalAprobar.items||"[]").map((i,idx)=>(
                   <div key={idx} style={{background:"rgba(7,10,18,0.6)",border:`1px solid ${C.border}`,borderRadius:"10px",padding:"10px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"10px"}}>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:"12px",fontWeight:"600"}}>{i.nombre}</div>
+                      <div style={{fontSize:"12px",fontWeight:"600"}}>{i.area&&i.area!==modalAprobar.area?`${AREA_EMOJIS[i.area]||""} `:""}{i.nombre}</div>
                       <div style={{fontSize:"10px",color:C.muted}}>Solicitó: {i.cantidad} {i.unidad}</div>
+                      {i.gramos&&<div style={{fontSize:"10px",color:C.warn}}>⚖️ {i.gramos} gr servidos</div>}
                       {i.nota&&<div style={{fontSize:"10px",color:C.muted,fontStyle:"italic"}}>💬 {i.nota}</div>}
                     </div>
                     <input type="number" min="0" value={cantAjuste[i.nombre]??i.cantidad}
