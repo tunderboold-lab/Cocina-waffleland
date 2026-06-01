@@ -12,273 +12,251 @@ const TU_NUMERO = "5215544690495";
 // ===== PRODUCTOS POR ÁREA =====
 const PRODUCTOS_AREA = {
   "Cajera": [
-    {nombre:"Portavasos",unidad:"Pz",optimo:35},
-    {nombre:"Servilletas",unidad:"Paquete",optimo:1},
-    {nombre:"Tenedores",unidad:"Bolsa",optimo:1},
-    {nombre:"Cucharas",unidad:"Paquete",optimo:2},
-    {nombre:"Popotes grueso",unidad:"Pz",optimo:60},
-    {nombre:"Popotes delgado",unidad:"Pz",optimo:60},
-    {nombre:"Playo",unidad:"Rollo",optimo:1},
-    {nombre:"Bolsas 25x40",unidad:"Paquete",optimo:1},
-    {nombre:"Bolsas 25x50",unidad:"Paquete",optimo:1},
-    {nombre:"Bolsas 30x60",unidad:"Paquete",optimo:1},
-    {nombre:"Tenedores para cubiertos",unidad:"Paquete",optimo:4},
-    {nombre:"Cuchillos para cubiertos",unidad:"Paquete",optimo:4},
-    {nombre:"Rollos para impresora",unidad:"Pz",optimo:4},
-    {nombre:"Rollos para terminal",unidad:"Pz",optimo:4},
-    {nombre:"Toallas desinfectantes",unidad:"Paquete",optimo:1},
-    {nombre:"Guantes M",unidad:"Paquete",optimo:1},
-    {nombre:"Guantes G",unidad:"Paquete",optimo:1},
-    {nombre:"Pluma",unidad:"Pz",optimo:1},
-    {nombre:"Plumón",unidad:"Pz",optimo:1},
+    {nombre:"Portavasos",id:172,unidad:"Pz",optimo:35},
+    {nombre:"Servilletas",id:167,unidad:"Paquete",optimo:1},
+    {nombre:"Tenedores",id:280,unidad:"Bolsa",optimo:1},
+    {nombre:"Cucharas",id:169,unidad:"Paquete",optimo:2},
+    {nombre:"Popotes grueso",id:160,unidad:"Pz",optimo:60},
+    {nombre:"Popotes delgado",id:159,unidad:"Pz",optimo:60},
+    {nombre:"Playo",id:281,unidad:"Rollo",optimo:1},
+    {nombre:"Bolsas 25x40",id:161,unidad:"Paquete",optimo:1},
+    {nombre:"Bolsas 25x50",id:1778912277146,unidad:"Paquete",optimo:1},
+    {nombre:"Bolsas 30x60",id:162,unidad:"Paquete",optimo:1},
+    {nombre:"Tenedores para cubiertos",id:170,unidad:"Paquete",optimo:4},
+    {nombre:"Cuchillos para cubiertos",id:171,unidad:"Paquete",optimo:4},
+    {nombre:"Rollos para impresora",id:316,unidad:"Pz",optimo:4},
+    {nombre:"Rollos para terminal",id:317,unidad:"Pz",optimo:4},
+    {nombre:"Toallas desinfectantes",id:182,unidad:"Paquete",optimo:1},
+    {nombre:"Guantes CH",id:319,unidad:"Paquete",optimo:1},
+    {nombre:"Guantes M",id:181,unidad:"Paquete",optimo:1},
+    {nombre:"Guantes G",id:320,unidad:"Paquete",optimo:1},
+    {nombre:"Pluma",id:290,unidad:"Pz",optimo:1},
+    {nombre:"Plumón",id:291,unidad:"Pz",optimo:1},
   ],
   "Pedidos a Domicilio": [
-    {nombre:"Portavasos",unidad:"Pz",optimo:35},
-    {nombre:"Servilletas",unidad:"Paquete",optimo:1},
-    {nombre:"Tenedores",unidad:"Paquete",optimo:1},
-    {nombre:"Cucharas",unidad:"Paquete",optimo:2},
-    {nombre:"Popotes grueso",unidad:"Pz",optimo:60},
-    {nombre:"Popotes delgado",unidad:"Pz",optimo:60},
-    {nombre:"Playo",unidad:"Rollo",optimo:1},
-    {nombre:"Bolsas 25x40",unidad:"Paquete",optimo:1},
-    {nombre:"Bolsas 25x50",unidad:"Paquete",optimo:1},
-    {nombre:"Bolsas 30x60",unidad:"Paquete",optimo:1},
-    {nombre:"Tenedores para cubiertos",unidad:"Paquete",optimo:4},
-    {nombre:"Cuchillos para cubiertos",unidad:"Paquete",optimo:4},
-    {nombre:"Rollos para impresora",unidad:"Pz",optimo:4},
-    {nombre:"Rollos para terminal",unidad:"Pz",optimo:4},
-    {nombre:"Toallas desinfectantes",unidad:"Paquete",optimo:1},
-    {nombre:"Guantes M",unidad:"Paquete",optimo:1},
-    {nombre:"Guantes G",unidad:"Paquete",optimo:1},
-    {nombre:"Pluma",unidad:"Pz",optimo:1},
-    {nombre:"Plumón",unidad:"Pz",optimo:1},
+    {nombre:"Portavasos",id:172,unidad:"Pz",optimo:35},
+    {nombre:"Servilletas",id:167,unidad:"Paquete",optimo:1},
+    {nombre:"Tenedores",id:280,unidad:"Bolsa",optimo:1},
+    {nombre:"Cucharas",id:169,unidad:"Paquete",optimo:2},
+    {nombre:"Popotes grueso",id:160,unidad:"Pz",optimo:60},
+    {nombre:"Popotes delgado",id:159,unidad:"Pz",optimo:60},
+    {nombre:"Playo",id:281,unidad:"Rollo",optimo:1},
+    {nombre:"Bolsas 25x40",id:161,unidad:"Paquete",optimo:1},
+    {nombre:"Bolsas 25x50",id:1778912277146,unidad:"Paquete",optimo:1},
+    {nombre:"Bolsas 30x60",id:162,unidad:"Paquete",optimo:1},
+    {nombre:"Tenedores para cubiertos",id:170,unidad:"Paquete",optimo:4},
+    {nombre:"Cuchillos para cubiertos",id:171,unidad:"Paquete",optimo:4},
+    {nombre:"Rollos para impresora",id:316,unidad:"Pz",optimo:4},
+    {nombre:"Rollos para terminal",id:317,unidad:"Pz",optimo:4},
+    {nombre:"Toallas desinfectantes",id:182,unidad:"Paquete",optimo:1},
+    {nombre:"Guantes CH",id:319,unidad:"Paquete",optimo:1},
+    {nombre:"Guantes M",id:181,unidad:"Paquete",optimo:1},
+    {nombre:"Guantes G",id:320,unidad:"Paquete",optimo:1},
+    {nombre:"Pluma",id:290,unidad:"Pz",optimo:1},
+    {nombre:"Plumón",id:291,unidad:"Pz",optimo:1},
   ],
   "Bebidas": [
-    {nombre:"Leche entera",unidad:"Pz",optimo:6},
-    {nombre:"Leche deslactosada",unidad:"Pz",optimo:5},
-    {nombre:"Leche de coco",unidad:"Pz",optimo:2},
-    {nombre:"Leche de almendra",unidad:"Pz",optimo:2},
-    {nombre:"Leche de avena",unidad:"Pz",optimo:1},
-    {nombre:"Base en polvo",unidad:"kg",optimo:2},
-    {nombre:"Azúcar",unidad:"kg",optimo:5},
-    {nombre:"Hielo",unidad:"bolsa",optimo:4},
-    {nombre:"Polvo fresa",unidad:"Bote",optimo:1},
-    {nombre:"Polvo chicozera",unidad:"Bote",optimo:1},
-    {nombre:"Polvo taro",unidad:"Bote",optimo:1},
-    {nombre:"Polvo chocolate",unidad:"Bote",optimo:1},
-    {nombre:"Polvo chocolate blanco",unidad:"Bote",optimo:1},
-    {nombre:"Polvo horchata",unidad:"Bote",optimo:1},
-    {nombre:"Polvo chai vainilla",unidad:"Bote",optimo:1},
-    {nombre:"Polvo caramelo",unidad:"Bote",optimo:1},
-    {nombre:"Polvo capuchino",unidad:"Bote",optimo:1},
-    {nombre:"Polvo flan",unidad:"Bote",optimo:1},
-    {nombre:"Polvo mazapán",unidad:"Bote",optimo:1},
-    {nombre:"Polvo crème brûlée",unidad:"Bote",optimo:1},
-    {nombre:"Polvo coco",unidad:"Bote",optimo:1},
-    {nombre:"Polvo mora azul",unidad:"Bote",optimo:1},
-    {nombre:"Polvo plátano",unidad:"Bote",optimo:1},
-    {nombre:"Polvo pistache",unidad:"Bote",optimo:1},
-    {nombre:"Polvo matcha",unidad:"Bote",optimo:1},
-    {nombre:"Polvo red velvet",unidad:"Bote",optimo:1},
-    {nombre:"Polvo cookies",unidad:"Bote",optimo:1},
-    {nombre:"Jarabe frutos rojos",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe mora azul",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe manzana verde",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe tamarindo",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe fresa",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe lichi",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe maracuyá",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe rompope",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe baileys",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe piñón",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe picafresa",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe pelón pelo rico",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe pulparindo",unidad:"Bote",optimo:1},
-    {nombre:"Jarabe avellana",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe caramelo",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe frambuesa",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe kiwi",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe limonada",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe mango",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe menta",unidad:"Botella",optimo:1},
-    {nombre:"Jarabe uva",unidad:"Botella",optimo:1},
-    {nombre:"Mango",unidad:"Pz",optimo:5},
-    {nombre:"Blueberries",unidad:"Domo",optimo:2},
-    {nombre:"Sandía",unidad:"Pedazo",optimo:1},
-    {nombre:"Limón",unidad:"kg",optimo:1},
-    {nombre:"Pepino",unidad:"Pz",optimo:2},
-    {nombre:"Arándano",unidad:"Bolsa",optimo:1},
-    {nombre:"Yakult",unidad:"Paquete",optimo:1},
-    {nombre:"Yogurt griego",unidad:"Bote",optimo:1},
-    {nombre:"Mermelada",unidad:"Mamila",optimo:1},
-    {nombre:"Hershey's",unidad:"Mamila",optimo:1},
-    {nombre:"Peñafiel",unidad:"Pz",optimo:1},
-    {nombre:"Sprite",unidad:"Pz",optimo:1},
-    {nombre:"Tapioca",unidad:"Toper",optimo:1},
-    {nombre:"Perlas explosivas",unidad:"Bote",optimo:1},
-    {nombre:"Chamoy",unidad:"Mamila",optimo:1},
-    {nombre:"Miguelito",unidad:"Mamila",optimo:1},
-    {nombre:"Canela",unidad:"Bote",optimo:1},
-    {nombre:"Galletas Marías",unidad:"Paquete",optimo:1},
-    {nombre:"Galletas Oreo",unidad:"Caja",optimo:1},
-    {nombre:"Conejitos Turín",unidad:"Paquete",optimo:1},
-    {nombre:"Gansito",unidad:"Pz",optimo:4},
-    {nombre:"Chocorrol",unidad:"Pz",optimo:4},
-    {nombre:"M&MS",unidad:"Pz",optimo:4},
-    {nombre:"Gomitas de aro",unidad:"gr",optimo:100},
-    {nombre:"Gomitas panditas",unidad:"gr",optimo:100},
-    {nombre:"Helado de chocolate",unidad:"Cubeta",optimo:1},
-    {nombre:"Helado de fresa",unidad:"Cubeta",optimo:1},
-    {nombre:"Helado de vainilla",unidad:"Cubeta",optimo:1},
-    {nombre:"Helado de limón",unidad:"Cubeta",optimo:1},
-    {nombre:"Helado cookies and cream",unidad:"Cubeta",optimo:1},
-    {nombre:"Paleta Magnum",unidad:"Pz",optimo:8},
-    {nombre:"Paleta Ferrero",unidad:"Pz",optimo:3},
-    {nombre:"Paleta Huevo Kinder",unidad:"Pz",optimo:2},
-    {nombre:"Paleta Raffaello",unidad:"Pz",optimo:3},
-    {nombre:"Mordisko",unidad:"Pz",optimo:5},
+    {nombre:"Leche entera",id:2,unidad:"Pz",optimo:6},
+    {nombre:"Leche deslactosada",id:6,unidad:"Pz",optimo:5},
+    {nombre:"Leche de coco",id:5,unidad:"Pz",optimo:2},
+    {nombre:"Leche de almendra",id:4,unidad:"Pz",optimo:2},
+    {nombre:"Leche de avena",id:3,unidad:"Pz",optimo:1},
+    {nombre:"Azúcar",id:50,unidad:"kg",optimo:5},
+    {nombre:"Hielo",id:285,unidad:"bolsa",optimo:4},
+    {nombre:"Polvo fresa",id:302,unidad:"Bote",optimo:1},
+    {nombre:"Polvo chocolate",id:303,unidad:"Bote",optimo:1},
+    {nombre:"Polvo chocolate abuelita",id:42,unidad:"Bote",optimo:1},
+    {nombre:"Polvo taro",id:30,unidad:"Bote",optimo:1},
+    {nombre:"Polvo chocolate blanco",id:38,unidad:"Bote",optimo:1},
+    {nombre:"Polvo horchata",id:31,unidad:"Bote",optimo:1},
+    {nombre:"Polvo chai vainilla",id:44,unidad:"Bote",optimo:1},
+    {nombre:"Polvo caramelo",id:37,unidad:"Bote",optimo:1},
+    {nombre:"Polvo capuchino",id:28,unidad:"Bote",optimo:1},
+    {nombre:"Polvo flan",id:45,unidad:"Bote",optimo:1},
+    {nombre:"Polvo mazapán",id:32,unidad:"Bote",optimo:1},
+    {nombre:"Polvo crème brûlée",id:40,unidad:"Bote",optimo:1},
+    {nombre:"Polvo coco",id:41,unidad:"Bote",optimo:1},
+    {nombre:"Polvo mora azul",id:33,unidad:"Bote",optimo:1},
+    {nombre:"Polvo plátano",id:1778915604968,unidad:"Bote",optimo:1},
+    {nombre:"Polvo pistache",id:34,unidad:"Bote",optimo:1},
+    {nombre:"Polvo matcha",id:29,unidad:"Bote",optimo:1},
+    {nombre:"Polvo red velvet",id:35,unidad:"Bote",optimo:1},
+    {nombre:"Polvo cookies",id:39,unidad:"Bote",optimo:1},
+    {nombre:"Jarabe frutos rojos",id:245,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe mora azul",id:257,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe manzana verde",id:250,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe tamarindo",id:254,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe fresa",id:244,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe lichi",id:248,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe maracuyá",id:256,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe rompope",id:206,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe baileys",id:13,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe piñón",id:207,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe picafresa",id:213,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe pelón pelo rico",id:218,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe pulparindo",id:212,unidad:"Bote",optimo:1},
+    {nombre:"Jarabe avellana",id:241,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe caramelo",id:311,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe frambuesa",id:243,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe kiwi",id:247,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe limonada",id:253,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe mango",id:249,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe menta",id:251,unidad:"Botella",optimo:1},
+    {nombre:"Jarabe uva",id:255,unidad:"Botella",optimo:1},
+    {nombre:"Yakult",id:24,unidad:"Paquete",optimo:1},
+    {nombre:"Yogurt griego",id:78,unidad:"Bote",optimo:1},
+    {nombre:"Mermelada",id:55,unidad:"Mamila",optimo:1},
+    {nombre:"Hershey's",id:87,unidad:"Mamila",optimo:1},
+    {nombre:"Peñafiel",id:20,unidad:"Pz",optimo:1},
+    {nombre:"Sprite",id:17,unidad:"Pz",optimo:1},
+    {nombre:"Tapioca",id:1779715504409,unidad:"Toper",optimo:1},
+    {nombre:"Perlas explosivas",id:1779014643990,unidad:"Bote",optimo:1},
+    {nombre:"Chamoy",id:135,unidad:"Mamila",optimo:1},
+    {nombre:"Miguelito",id:95,unidad:"Mamila",optimo:1},
+    {nombre:"Canela",id:203,unidad:"Bote",optimo:1},
+    {nombre:"Galletas Marías",id:296,unidad:"Paquete",optimo:1},
+    {nombre:"Galletas Oreo",id:225,unidad:"Caja",optimo:1},
+    {nombre:"Conejitos Turín",id:98,unidad:"Paquete",optimo:1},
+    {nombre:"Gansito",id:217,unidad:"Pz",optimo:4},
+    {nombre:"Chocorrol",id:215,unidad:"Pz",optimo:4},
+    {nombre:"M&MS",id:84,unidad:"Pz",optimo:4},
+    {nombre:"Gomitas de aro",id:195,unidad:"gr",optimo:100},
+    {nombre:"Gomitas panditas",id:221,unidad:"gr",optimo:100},
+    {nombre:"Helado de chocolate",id:114,unidad:"Cubeta",optimo:1},
+    {nombre:"Helado de fresa",id:113,unidad:"Cubeta",optimo:1},
+    {nombre:"Helado de vainilla",id:115,unidad:"Cubeta",optimo:1},
+    {nombre:"Helado de limón",id:298,unidad:"Cubeta",optimo:1},
+    {nombre:"Helado cookies and cream",id:116,unidad:"Cubeta",optimo:1},
+    {nombre:"Paleta Magnum",id:117,unidad:"Pz",optimo:8},
+    {nombre:"Paleta Ferrero",id:119,unidad:"Pz",optimo:3},
+    {nombre:"Paleta Huevo Kinder",id:315,unidad:"Pz",optimo:2},
+    {nombre:"Paleta Raffaello",id:120,unidad:"Pz",optimo:3},
+    {nombre:"Mordisko",id:219,unidad:"Pz",optimo:5},
   ],
   "Crepas": [
-    {nombre:"Cajeta",unidad:"Mamila",optimo:1},
-    {nombre:"Lechera",unidad:"Lata",optimo:4},
-    {nombre:"Nutella",unidad:"Bote 3kg",optimo:2},
-    {nombre:"Mermelada de fresa",unidad:"Mamila",optimo:1},
-    {nombre:"Mermelada de zarzamora",unidad:"Mamila",optimo:1},
-    {nombre:"Crema de cacahuate",unidad:"Bote",optimo:1},
-    {nombre:"Maple",unidad:"Botella",optimo:1},
-    {nombre:"Hershey's líquido",unidad:"Mamila",optimo:1},
-    {nombre:"Zarzamora",unidad:"Domo",optimo:2},
-    {nombre:"Frambuesa",unidad:"Domo",optimo:1},
-    {nombre:"Cereza",unidad:"Bote",optimo:1},
-    {nombre:"Durazno",unidad:"Lata",optimo:1},
-    {nombre:"Kiwi",unidad:"Pz",optimo:4},
-    {nombre:"Uva",unidad:"gr",optimo:500},
-    {nombre:"Mora",unidad:"Domo",optimo:1},
-    {nombre:"Fresa",unidad:"Caja",optimo:1},
-    {nombre:"Bombón de chocolate",unidad:"Pz",optimo:6},
-    {nombre:"Bombones",unidad:"Bolsa",optimo:2},
-    {nombre:"Ferrero",unidad:"Pz",optimo:25},
-    {nombre:"Chocoretas",unidad:"Pz",optimo:10},
-    {nombre:"Kranky",unidad:"Pz",optimo:15},
-    {nombre:"Crunch",unidad:"Pz",optimo:5},
-    {nombre:"Chocolate Hershey's barra",unidad:"Pz",optimo:4},
-    {nombre:"Pingüino",unidad:"Pz",optimo:9},
-    {nombre:"Chocorrol",unidad:"Pz",optimo:9},
-    {nombre:"Gansito",unidad:"Pz",optimo:9},
-    {nombre:"Huevo Kinder",unidad:"Pz",optimo:10},
-    {nombre:"Kinder chocolate",unidad:"Pz",optimo:15},
-    {nombre:"Kinder Delice",unidad:"Pz",optimo:15},
-    {nombre:"Kinder Bueno",unidad:"Pz",optimo:20},
-    {nombre:"Kit Kat",unidad:"Pz",optimo:10},
-    {nombre:"Carlos V",unidad:"Pz",optimo:10},
-    {nombre:"Pretzel",unidad:"gr",optimo:200},
-    {nombre:"Conejito Turín",unidad:"Pz",optimo:24},
-    {nombre:"Mazapán",unidad:"Pz",optimo:25},
-    {nombre:"Bubulubu",unidad:"Pz",optimo:9},
-    {nombre:"Galleta Lotus",unidad:"Paquete",optimo:1},
-    {nombre:"Granillo Turín",unidad:"Bolsa 250gr",optimo:2},
-    {nombre:"Nuez",unidad:"Bolsa 250gr",optimo:1},
-    {nombre:"Almendra",unidad:"Bolsa 250gr",optimo:1},
-    {nombre:"Chispas Cafe",unidad:"Bolsa 250gr",optimo:2},
-    {nombre:"Oreo",unidad:"Caja",optimo:1},
-    {nombre:"Chispas blancas",unidad:"Bolsa 250gr",optimo:1},
-    {nombre:"Charola 8x8",unidad:"Pz",optimo:50},
-    {nombre:"Plato para comer dentro",unidad:"Pz",optimo:30},
-    {nombre:"Papeles para los platos",unidad:"Pz",optimo:100},
-    {nombre:"Aluminio",unidad:"Rollo",optimo:1},
-    {nombre:"Gas",unidad:"Tanque",optimo:1},
+    {nombre:"Cajeta",id:56,unidad:"Mamila",optimo:1},
+    {nombre:"Lechera",id:9,unidad:"Lata",optimo:4},
+    {nombre:"Nutella",id:85,unidad:"Bote 3kg",optimo:2},
+    {nombre:"Mermelada de fresa",id:55,unidad:"Mamila",optimo:1},
+    {nombre:"Mermelada de zarzamora",id:297,unidad:"Mamila",optimo:1},
+    {nombre:"Crema de cacahuate",id:200,unidad:"Bote",optimo:1},
+    {nombre:"Maple",id:57,unidad:"Botella",optimo:1},
+    {nombre:"Hershey's líquido",id:87,unidad:"Mamila",optimo:1},
+    {nombre:"Cereza",id:75,unidad:"Bote",optimo:1},
+    {nombre:"Durazno",id:198,unidad:"Lata",optimo:1},
+    {nombre:"Bombón de chocolate",id:223,unidad:"Pz",optimo:6},
+    {nombre:"Bombones",id:94,unidad:"Bolsa",optimo:2},
+    {nombre:"Ferrero",id:79,unidad:"Pz",optimo:25},
+    {nombre:"Chocoretas",id:92,unidad:"Pz",optimo:10},
+    {nombre:"Kranky",id:93,unidad:"Pz",optimo:15},
+    {nombre:"Crunch",id:301,unidad:"Pz",optimo:5},
+    {nombre:"Chocolate Hershey's barra",id:86,unidad:"Pz",optimo:4},
+    {nombre:"Pingüino",id:118,unidad:"Pz",optimo:9},
+    {nombre:"Chocorrol",id:215,unidad:"Pz",optimo:9},
+    {nombre:"Gansito",id:217,unidad:"Pz",optimo:9},
+    {nombre:"Huevo Kinder",id:97,unidad:"Pz",optimo:10},
+    {nombre:"Kinder chocolate",id:81,unidad:"Pz",optimo:15},
+    {nombre:"Kinder Delice",id:82,unidad:"Pz",optimo:15},
+    {nombre:"Kinder Bueno",id:80,unidad:"Pz",optimo:20},
+    {nombre:"Kit Kat",id:83,unidad:"Pz",optimo:10},
+    {nombre:"Carlos V",id:88,unidad:"Pz",optimo:10},
+    {nombre:"Pretzel",id:104,unidad:"gr",optimo:200},
+    {nombre:"Conejito Turín",id:98,unidad:"Pz",optimo:24},
+    {nombre:"Mazapán",id:90,unidad:"Pz",optimo:25},
+    {nombre:"Bubulubu",id:91,unidad:"Pz",optimo:9},
+    {nombre:"Galleta Lotus",id:53,unidad:"Paquete",optimo:1},
+    {nombre:"Granillo Turín",id:190,unidad:"Bolsa 250gr",optimo:2},
+    {nombre:"Nuez",id:189,unidad:"Bolsa 250gr",optimo:1},
+    {nombre:"Almendra",id:187,unidad:"Bolsa 250gr",optimo:1},
+    {nombre:"Chispas Cafe",id:193,unidad:"Bolsa 250gr",optimo:2},
+    {nombre:"Oreo",id:225,unidad:"Caja",optimo:1},
+    {nombre:"Chispas blancas",id:192,unidad:"Bolsa 250gr",optimo:1},
+    {nombre:"Charola 8x8",id:165,unidad:"Pz",optimo:50},
+    {nombre:"Plato para comer dentro",id:164,unidad:"Pz",optimo:30},
+    {nombre:"Papeles para los platos",id:176,unidad:"Pz",optimo:100},
+    {nombre:"Aluminio",id:168,unidad:"Rollo",optimo:1},
+    {nombre:"Gas",id:286,unidad:"Tanque",optimo:1},
   ],
   "Estación Dulce": [
-    {nombre:"Mezcla de hot cakes",unidad:"Bote",optimo:1},
-    {nombre:"Mezcla de crepas",unidad:"Bote",optimo:1},
-    {nombre:"Mezcla de waffles",unidad:"Bote",optimo:1},
-    {nombre:"Crema Raffaello",unidad:"Bote",optimo:1},
-    {nombre:"Crema Ferrero",unidad:"Bote",optimo:1},
-    {nombre:"Crema batida",unidad:"Bote",optimo:2},
-    {nombre:"Crema de fresas",unidad:"Bote",optimo:1},
-    {nombre:"Crema de Baileys",unidad:"Manga",optimo:1},
-    {nombre:"Mantequilla",unidad:"Barra",optimo:4},
-    {nombre:"Queso manchego",unidad:"Paquetes",optimo:6},
-    {nombre:"Queso mozzarella",unidad:"Paquetes",optimo:8},
-    {nombre:"Queso 4 quesos",unidad:"Paquetes",optimo:5},
-    {nombre:"Philadelphia",unidad:"Dosis",optimo:20},
-    {nombre:"Danoninos",unidad:"Pz",optimo:6},
-    {nombre:"Duraznos",unidad:"Lata",optimo:1},
-    {nombre:"Piña",unidad:"Lata",optimo:1},
-    {nombre:"Cereza",unidad:"Bote",optimo:1},
-    {nombre:"Jamón",unidad:"Paquetes",optimo:8},
-    {nombre:"Pepperoni",unidad:"gr",optimo:400},
-    {nombre:"Salsa de tomate",unidad:"Frasco",optimo:1},
-    {nombre:"Charola 8x8",unidad:"Pz",optimo:50},
-    {nombre:"Charola Hamburguesera",unidad:"Pz",optimo:30},
-    {nombre:"Papeles",unidad:"Pz",optimo:100},
+    {nombre:"Crema de Baileys",id:12,unidad:"Manga",optimo:1},
+    {nombre:"Mantequilla",id:52,unidad:"Barra",optimo:4},
+    {nombre:"Queso manchego",id:122,unidad:"Paquetes",optimo:6},
+    {nombre:"Queso mozzarella",id:123,unidad:"Paquetes",optimo:8},
+    {nombre:"Queso 4 quesos",id:235,unidad:"Paquetes",optimo:5},
+    {nombre:"Philadelphia",id:127,unidad:"Dosis",optimo:20},
+    {nombre:"Danoninos",id:77,unidad:"Pz",optimo:6},
+    {nombre:"Duraznos",id:198,unidad:"Lata",optimo:1},
+    {nombre:"Piña",id:196,unidad:"Lata",optimo:1},
+    {nombre:"Cereza",id:75,unidad:"Bote",optimo:1},
+    {nombre:"Jamón",id:132,unidad:"Paquetes",optimo:8},
+    {nombre:"Pechuga de Pavo",id:133,unidad:"kg",optimo:1},
+    {nombre:"Pepperoni",id:134,unidad:"gr",optimo:400},
+    {nombre:"Salsa de tomate",id:144,unidad:"Frasco",optimo:1},
+    {nombre:"Charola 8x8",id:165,unidad:"Pz",optimo:50},
+    {nombre:"Charola Hamburguesera",id:166,unidad:"Pz",optimo:30},
+    {nombre:"Papeles",id:176,unidad:"Pz",optimo:100},
   ],
   "Frito": [
-    {nombre:"Alitas",unidad:"Pz",optimo:50},
-    {nombre:"Salchicha",unidad:"Paquete",optimo:1},
-    {nombre:"Tocino",unidad:"Paquete",optimo:1},
-    {nombre:"Tocino en trozos",unidad:"Bote",optimo:1},
-    {nombre:"Queso barra",unidad:"Barra",optimo:1},
-    {nombre:"Queso amarillo",unidad:"Bolsa",optimo:1},
-    {nombre:"Queso parmesano",unidad:"Bote",optimo:1},
-    {nombre:"Limones",unidad:"kg",optimo:1},
-    {nombre:"Plátanos macho",unidad:"Pz",optimo:10},
-    {nombre:"Lechuga",unidad:"Pz",optimo:1},
-    {nombre:"Jalapeño",unidad:"Bolsa",optimo:1},
-    {nombre:"Aros de cebolla",unidad:"Bolsa",optimo:1},
-    {nombre:"Papas francesa",unidad:"Bolsa",optimo:4},
-    {nombre:"Papas gajo",unidad:"Bolsa",optimo:4},
-    {nombre:"Aceite",unidad:"Bidón",optimo:1},
-    {nombre:"Panko",unidad:"kg",optimo:1},
-    {nombre:"Ramen",unidad:"Paquete",optimo:2},
-    {nombre:"Polvo Flamin'",unidad:"gr",optimo:250},
-    {nombre:"Polvo Azul Fuego",unidad:"gr",optimo:250},
-    {nombre:"Polvo Chipotle",unidad:"gr",optimo:250},
-    {nombre:"Polvo Sabritas",unidad:"gr",optimo:250},
-    {nombre:"Polvo Habanero",unidad:"gr",optimo:250},
-    {nombre:"Polvo Adobado",unidad:"gr",optimo:250},
-    {nombre:"Polvo Jalapeño",unidad:"gr",optimo:250},
-    {nombre:"Tajín",unidad:"Bote",optimo:1},
-    {nombre:"Cheetos Flamin'",unidad:"Bolsa",optimo:1},
-    {nombre:"Cheesy Cheddar",unidad:"gr",optimo:250},
-    {nombre:"Doritos",unidad:"Bolsa",optimo:1},
-    {nombre:"Takis Azules",unidad:"Bolsa",optimo:1},
-    {nombre:"Bonolees",unidad:"Bolsa",optimo:3},
-    {nombre:"Chipotle líquido",unidad:"Botella",optimo:1},
-    {nombre:"Valentina",unidad:"Botella",optimo:1},
-    {nombre:"Maggi",unidad:"Botella",optimo:1},
-    {nombre:"Botanera",unidad:"Botella",optimo:1},
-    {nombre:"Salsa Fantasma",unidad:"Botella",optimo:1},
-    {nombre:"Limón Pepee",unidad:"Galón",optimo:1},
-    {nombre:"Búfalo",unidad:"Galón",optimo:1},
-    {nombre:"Ranch",unidad:"Galón",optimo:1},
-    {nombre:"Mango Habanero",unidad:"Galón",optimo:1},
-    {nombre:"BBQ",unidad:"Galón",optimo:1},
-    {nombre:"Catsup",unidad:"Galón",optimo:1},
-    {nombre:"Salsa Doritos",unidad:"Botella",optimo:1},
-    {nombre:"Salsa Original Alitas",unidad:"Botella",optimo:1},
-    {nombre:"Salsa Sabritas Adobado",unidad:"Botella",optimo:1},
-    {nombre:"Salsa Tamarindo 3 Chiles",unidad:"Botella",optimo:1},
-    {nombre:"Salsa Cheetos",unidad:"Botella",optimo:1},
-    {nombre:"Salsa Takis Fuego",unidad:"Botella",optimo:1},
-    {nombre:"Salsa Sabritas Habanero",unidad:"Botella",optimo:1},
-    {nombre:"Crema",unidad:"Cubeta",optimo:1},
-    {nombre:"Sal",unidad:"Bote",optimo:1},
-    {nombre:"Charola 8x8",unidad:"Pz",optimo:30},
-    {nombre:"Charola hamburguesera",unidad:"Pz",optimo:30},
-    {nombre:"Charola blanca banderilla",unidad:"Pz",optimo:20},
-    {nombre:"Cono de cartón",unidad:"Pz",optimo:20},
-    {nombre:"Caja banderilla coreana",unidad:"Pz",optimo:30},
-    {nombre:"Papel cuadriculado",unidad:"Pz",optimo:100},
-    {nombre:"Palillos banderilla",unidad:"Pz",optimo:30},
-    {nombre:"Cloro",unidad:"Bidón",optimo:1},
-    {nombre:"Jabón Roma",unidad:"Bolsa",optimo:1},
-    {nombre:"Fabuloso",unidad:"Bidón",optimo:1},
-    {nombre:"Bolsas de basura",unidad:"Pz",optimo:1},
-    {nombre:"Esponja para trastes",unidad:"Pz",optimo:2},
-    {nombre:"Trapos",unidad:"Pz",optimo:8},
-    {nombre:"Cofia",unidad:"Pz",optimo:2},
-    {nombre:"Gas",unidad:"Tanque",optimo:1},
+    {nombre:"Alitas",id:109,unidad:"Pz",optimo:50},
+    {nombre:"Salchicha",id:131,unidad:"Paquete",optimo:1},
+    {nombre:"Tocino",id:130,unidad:"Paquete",optimo:1},
+    {nombre:"Tocino en trozos",id:314,unidad:"Bote",optimo:1},
+    {nombre:"Queso barra",id:124,unidad:"Barra",optimo:1},
+    {nombre:"Queso amarillo",id:126,unidad:"Bolsa",optimo:1},
+    {nombre:"Queso parmesano",id:125,unidad:"Bote",optimo:1},
+    {nombre:"Jalapeño",id:112,unidad:"Bolsa",optimo:1},
+    {nombre:"Aros de cebolla",id:107,unidad:"Bolsa",optimo:1},
+    {nombre:"Papas francesa",id:106,unidad:"Bolsa",optimo:4},
+    {nombre:"Papas gajo",id:105,unidad:"Bolsa",optimo:4},
+    {nombre:"Aceite",id:199,unidad:"Bidón",optimo:1},
+    {nombre:"Panko",id:1779574772988,unidad:"kg",optimo:1},
+    {nombre:"Ramen",id:234,unidad:"Paquete",optimo:2},
+    {nombre:"Polvo Flamin'",id:304,unidad:"gr",optimo:250},
+    {nombre:"Polvo Azul Fuego",id:305,unidad:"gr",optimo:250},
+    {nombre:"Polvo Chipotle",id:270,unidad:"gr",optimo:250},
+    {nombre:"Polvo Sabritas",id:306,unidad:"gr",optimo:250},
+    {nombre:"Polvo Habanero",id:307,unidad:"gr",optimo:250},
+    {nombre:"Polvo Adobado",id:308,unidad:"gr",optimo:250},
+    {nombre:"Polvo Jalapeño",id:309,unidad:"gr",optimo:250},
+    {nombre:"Tajín",id:136,unidad:"Bote",optimo:1},
+    {nombre:"Cheetos Flamin",id:102,unidad:"Bolsa",optimo:1},
+    {nombre:"Cheesy Cheddar",id:310,unidad:"gr",optimo:250},
+    {nombre:"Doritos",id:101,unidad:"Bolsa",optimo:1},
+    {nombre:"Takis Azules",id:100,unidad:"Bolsa",optimo:1},
+    {nombre:"Bonolees",id:110,unidad:"Bolsa",optimo:3},
+    {nombre:"Chipotle líquido",id:141,unidad:"Botella",optimo:1},
+    {nombre:"Valentina",id:137,unidad:"Botella",optimo:1},
+    {nombre:"Maggi",id:147,unidad:"Botella",optimo:1},
+    {nombre:"Botanera",id:313,unidad:"Botella",optimo:1},
+    {nombre:"Salsa Fantasma",id:149,unidad:"Botella",optimo:1},
+    {nombre:"Limón Pepee",id:145,unidad:"Galón",optimo:1},
+    {nombre:"Búfalo",id:140,unidad:"Galón",optimo:1},
+    {nombre:"Ranch",id:138,unidad:"Galón",optimo:1},
+    {nombre:"Mango Habanero",id:269,unidad:"Galón",optimo:1},
+    {nombre:"BBQ",id:139,unidad:"Galón",optimo:1},
+    {nombre:"Catsup",id:143,unidad:"Galón",optimo:1},
+    {nombre:"Salsa Doritos",id:259,unidad:"Botella",optimo:1},
+    {nombre:"Salsa Original Alitas",id:239,unidad:"Botella",optimo:1},
+    {nombre:"Salsa Tamarindo 3 Chiles",id:150,unidad:"Botella",optimo:1},
+    {nombre:"Salsa Cheetos",id:261,unidad:"Botella",optimo:1},
+    {nombre:"Salsa Takis Fuego",id:260,unidad:"Botella",optimo:1},
+    {nombre:"Salsa Sabritas Habanero",id:312,unidad:"Botella",optimo:1},
+    {nombre:"Crema",id:128,unidad:"Cubeta",optimo:1},
+    {nombre:"Sal",id:148,unidad:"Bote",optimo:1},
+    {nombre:"Charola 8x8",id:165,unidad:"Pz",optimo:30},
+    {nombre:"Charola hamburguesera",id:166,unidad:"Pz",optimo:30},
+    {nombre:"Charola blanca banderilla",id:282,unidad:"Pz",optimo:20},
+    {nombre:"Cono de cartón",id:318,unidad:"Pz",optimo:20},
+    {nombre:"Caja banderilla coreana",id:276,unidad:"Pz",optimo:30},
+    {nombre:"Papel cuadriculado",id:176,unidad:"Pz",optimo:100},
+    {nombre:"Palillos banderilla",id:174,unidad:"Pz",optimo:30},
+    {nombre:"Cloro",id:179,unidad:"Bidón",optimo:1},
+    {nombre:"Jabón Roma",id:27,unidad:"Bolsa",optimo:1},
+    {nombre:"Fabuloso",id:284,unidad:"Bidón",optimo:1},
+    {nombre:"Bolsas de basura",id:186,unidad:"Pz",optimo:1},
+    {nombre:"Esponja para trastes",id:1779144761764,unidad:"Pz",optimo:2},
+    {nombre:"Cofia",id:321,unidad:"Pz",optimo:2},
+    {nombre:"Gas",id:286,unidad:"Tanque",optimo:1},
   ],
 };
 
@@ -296,9 +274,23 @@ const PRODUCTOS_RELLENABLES = [
   "Crepas||Mermelada de fresa",
   "Crepas||Mermelada de zarzamora",
   "Crepas||Hershey's líquido",
+  "Frito||Panko",
+  "Frito||Polvo Flamin'",
+  "Frito||Polvo Azul Fuego",
+  "Frito||Polvo Sabritas",
+  "Frito||Polvo Habanero",
+  "Frito||Polvo Adobado",
+  "Frito||Polvo Jalapeño",
+  "Frito||Cheesy Cheddar",
 ];
 function esRellenable(area, nombre) {
   return PRODUCTOS_RELLENABLES.includes(area + "||" + nombre);
+}
+
+// Busca un producto (con su id) dentro de PRODUCTOS_AREA por area+nombre
+function buscarProducto(area, nombre) {
+  const lista = PRODUCTOS_AREA[area] || [];
+  return lista.find(p => p.nombre === nombre) || null;
 }
 
 const ESTADOS = {
@@ -401,6 +393,52 @@ export default function CocinaApp() {
     setModalLogin(true);
   }
 
+  // ===== DESCUENTO DE INVENTARIO POR ID (núcleo del arreglo) =====
+  // Descuenta del inventario los items aprobados, usando el id real del producto.
+  // Si un item no tiene id (frutas/preparados tema futuro), se salta el descuento.
+  async function descontarInventario(items, cantidades, sol) {
+    for (const item of items) {
+      const cantFinal = cantidades ? (cantidades[item.nombre] ?? item.cantidad) : item.cantidad;
+      if (cantFinal <= 0) continue;
+
+      // Buscar el id: primero el que viene guardado en el item, si no, en la lista
+      let idInv = item.id;
+      if (!idInv) {
+        const prod = buscarProducto(item.area || sol.area, item.nombre);
+        idInv = prod ? prod.id : null;
+      }
+      // Sin id => producto no rastreado en inventario (tema futuro). Saltar.
+      if (!idInv) continue;
+
+      // Leer cantidad actual del producto
+      const {data: invRows} = await supabase
+        .from("inventario")
+        .select("id,cantidad,nombre")
+        .eq("id", idInv)
+        .limit(1);
+      if (!invRows || invRows.length === 0) continue;
+
+      const prod = invRows[0];
+      // Para productos grameables: descontar los gramos servidos, no la cantidad de botes
+      const esGram = esRellenable(item.area || sol.area, item.nombre);
+      const aDescontar = (esGram && item.gramos) ? +item.gramos : cantFinal;
+      const nuevaCant = Math.max(0, prod.cantidad - aDescontar);
+
+      await supabase.from("inventario").update({cantidad: nuevaCant}).eq("id", prod.id);
+      await supabase.from("historial").insert({
+        producto_id: prod.id,
+        nombre: prod.nombre,
+        unidad: item.unidad,
+        tipo: "consumo",
+        cantidad: aDescontar,
+        antes: prod.cantidad,
+        despues: nuevaCant,
+        fecha: new Date().toISOString(),
+        usuario: `${usuario.nombre} (Cocina - ${sol.area})`,
+      });
+    }
+  }
+
   async function enviarSolicitud(urgente = false) {
     if (Object.keys(carrito).length === 0) return;
 
@@ -414,11 +452,11 @@ export default function CocinaApp() {
     }
 
     setEnviando(true);
-    // Cada item del carrito ya trae su area (para multi-área)
+    // Cada item del carrito ya trae su area (para multi-área) y su id
     const items = Object.values(carrito)
       .filter(v => v.cantidad > 0)
       .map(v => {
-        const item = {nombre: v.nombre, unidad: v.unidad, cantidad: v.cantidad, nota: v.nota || "", area: v.area || usuario.area};
+        const item = {nombre: v.nombre, id: v.id || null, unidad: v.unidad, cantidad: v.cantidad, nota: v.nota || "", area: v.area || usuario.area};
         if (esRellenable(item.area, item.nombre) && v.gramos) item.gramos = +v.gramos;
         return item;
       });
@@ -446,6 +484,12 @@ export default function CocinaApp() {
     const {data, error} = await supabase.from("solicitudes_cocina").insert(sol).select().single();
     if (!error && data) {
       setSolicitudes(s => [data, ...s]);
+
+      // Si se auto-aprobó, descontar inventario inmediatamente
+      if (autoAprobar) {
+        await descontarInventario(items, null, data);
+      }
+
       // Agrupar productos por área para el mensaje
       const porArea = {};
       items.forEach(i => {
@@ -506,31 +550,7 @@ export default function CocinaApp() {
 
     if (estado === "aprobada" || estado === "ajustada") {
       const items = JSON.parse(sol.items);
-      for (const item of items) {
-        const cantFinal = cantidades ? (cantidades[item.nombre] ?? item.cantidad) : item.cantidad;
-        if (cantFinal <= 0) continue;
-        const {data: inv} = await supabase
-          .from("inventario")
-          .select("id,cantidad,nombre")
-          .ilike("nombre", `%${item.nombre.split(" ")[0]}%`)
-          .limit(1);
-        if (inv && inv.length > 0) {
-          const prod = inv[0];
-          const nuevaCant = Math.max(0, prod.cantidad - cantFinal);
-          await supabase.from("inventario").update({cantidad: nuevaCant}).eq("id", prod.id);
-          await supabase.from("historial").insert({
-            producto_id: prod.id,
-            nombre: prod.nombre,
-            unidad: item.unidad,
-            tipo: "consumo",
-            cantidad: cantFinal,
-            antes: prod.cantidad,
-            despues: nuevaCant,
-            fecha: new Date().toISOString(),
-            usuario: `${usuario.nombre} (Cocina - ${sol.area})`,
-          });
-        }
-      }
+      await descontarInventario(items, cantidades, sol);
       if (cantidades) updates.items_ajustados = JSON.stringify(cantidades);
     }
 
@@ -784,12 +804,12 @@ export default function CocinaApp() {
                         <div style={{fontSize:"10px",color:C.muted}}>Óptimo: {p.optimo} {p.unidad}</div>
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,area:areaMostrada,unidad:p.unidad,cantidad:Math.max(0,(c[key]?.cantidad||0)-1)}}))}
+                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,id:p.id,area:areaMostrada,unidad:p.unidad,cantidad:Math.max(0,(c[key]?.cantidad||0)-1)}}))}
                           style={{background:"rgba(248,113,113,0.2)",border:"none",color:C.danger,width:"28px",height:"28px",borderRadius:"7px",cursor:"pointer",fontSize:"16px",fontWeight:"700"}}>−</button>
                         <div style={{background:qty>0?"rgba(125,211,252,0.15)":"rgba(255,255,255,0.05)",border:`1px solid ${qty>0?"rgba(125,211,252,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:"8px",padding:"4px 10px",fontFamily:"'JetBrains Mono',monospace",fontWeight:"600",color:qty>0?C.accent:C.muted,fontSize:"13px",minWidth:"64px",textAlign:"center"}}>
                           {qty} {p.unidad}
                         </div>
-                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,area:areaMostrada,unidad:p.unidad,cantidad:(c[key]?.cantidad||0)+1}}))}
+                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,id:p.id,area:areaMostrada,unidad:p.unidad,cantidad:(c[key]?.cantidad||0)+1}}))}
                           style={{background:"rgba(52,211,153,0.2)",border:"none",color:C.success,width:"28px",height:"28px",borderRadius:"7px",cursor:"pointer",fontSize:"16px",fontWeight:"700"}}>+</button>
                       </div>
                     </div>
