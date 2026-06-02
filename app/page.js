@@ -485,10 +485,10 @@ export default function CocinaApp() {
     if (!error && data) {
       setSolicitudes(s => [data, ...s]);
 
-      // Si se auto-aprobó, descontar inventario inmediatamente
-      if (autoAprobar) {
-        await descontarInventario(items, null, data);
-      }
+      // [DESACTIVADO] Descuento de inventario apagado temporalmente.
+      // El gerente/subgerente surte de bodega manualmente.
+      // Para reactivar: descomentar la línea de abajo.
+      // if (autoAprobar) { await descontarInventario(items, null, data); }
 
       // Agrupar productos por área para el mensaje
       const porArea = {};
@@ -549,8 +549,11 @@ export default function CocinaApp() {
     if (motivo) updates.motivo_rechazo = motivo;
 
     if (estado === "aprobada" || estado === "ajustada") {
-      const items = JSON.parse(sol.items);
-      await descontarInventario(items, cantidades, sol);
+      // [DESACTIVADO] Descuento de inventario apagado temporalmente.
+      // El gerente/subgerente surte de bodega manualmente.
+      // Para reactivar: descomentar la línea de descontarInventario.
+      // const items = JSON.parse(sol.items);
+      // await descontarInventario(items, cantidades, sol);
       if (cantidades) updates.items_ajustados = JSON.stringify(cantidades);
     }
 
@@ -856,12 +859,23 @@ export default function CocinaApp() {
                     </div>
                     <div style={{background:est.bg,border:`1px solid ${est.color}40`,borderRadius:"6px",padding:"3px 10px",fontSize:"11px",fontWeight:"700",color:est.color}}>{est.label}</div>
                   </div>
-                  {items.map((i,idx)=>(
+                  {(()=>{const ajustes=s.items_ajustados?JSON.parse(s.items_ajustados):null;return items.map((i,idx)=>{
+                    const tieneAjuste = ajustes && (ajustes[i.nombre]!==undefined) && (+ajustes[i.nombre]!==+i.cantidad);
+                    const cantAjustada = ajustes ? ajustes[i.nombre] : null;
+                    return(
                     <div key={idx} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:`1px solid ${C.border}`,fontSize:"12px"}}>
                       <span>{i.area&&i.area!==s.area?`${AREA_EMOJIS[i.area]||""} `:""}{i.nombre}{i.gramos?<span style={{color:C.warn,fontSize:"10px"}}> ⚖️{i.gramos}gr</span>:null}</span>
-                      <span style={{fontFamily:"'JetBrains Mono',monospace",color:C.accent}}>{i.cantidad} {i.unidad}</span>
+                      {tieneAjuste?(
+                        <span style={{fontFamily:"'JetBrains Mono',monospace"}}>
+                          <span style={{color:C.muted,textDecoration:"line-through"}}>{i.cantidad}</span>
+                          <span style={{color:C.info}}> → {cantAjustada} {i.unidad}</span>
+                        </span>
+                      ):(
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",color:C.accent}}>{i.cantidad} {i.unidad}</span>
+                      )}
                     </div>
-                  ))}
+                    );
+                  });})()}
                   {s.motivo_rechazo&&<div style={{fontSize:"11px",color:C.danger,marginTop:"8px"}}>❌ {s.motivo_rechazo}</div>}
                   {s.aprobado_por&&s.estado!=="rechazada"&&<div style={{fontSize:"10px",color:C.muted,marginTop:"6px"}}>✅ Aprobado por {s.aprobado_por}</div>}
                 </div>
