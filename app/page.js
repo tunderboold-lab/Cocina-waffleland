@@ -801,9 +801,9 @@ export default function CocinaApp() {
                     <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
                       <div style={{flex:1}}>
                         <div style={{fontSize:"13px",fontWeight:"600"}}>{p.nombre}</div>
-                        <div style={{fontSize:"10px",color:C.muted}}>Óptimo: {p.optimo} {p.unidad}</div>
                       </div>
-                      <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                        <div style={{fontSize:"10px",color:C.muted,textAlign:"right",lineHeight:"1.2",whiteSpace:"nowrap"}}>Óptimo<br/><span style={{color:C.accent,fontWeight:"700",fontSize:"12px"}}>{p.optimo} {p.unidad}</span></div>
                         <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,id:p.id,area:areaMostrada,unidad:p.unidad,cantidad:Math.max(0,(c[key]?.cantidad||0)-1)}}))}
                           style={{background:"rgba(248,113,113,0.2)",border:"none",color:C.danger,width:"28px",height:"28px",borderRadius:"7px",cursor:"pointer",fontSize:"16px",fontWeight:"700"}}>−</button>
                         <div style={{background:qty>0?"rgba(125,211,252,0.15)":"rgba(255,255,255,0.05)",border:`1px solid ${qty>0?"rgba(125,211,252,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:"8px",padding:"4px 10px",fontFamily:"'JetBrains Mono',monospace",fontWeight:"600",color:qty>0?C.accent:C.muted,fontSize:"13px",minWidth:"64px",textAlign:"center"}}>
