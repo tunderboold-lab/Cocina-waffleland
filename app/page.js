@@ -7,7 +7,7 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1d2V1YmVsY3hzdmtpZnlpYmZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTk5MTYsImV4cCI6MjA5NDMzNTkxNn0.NLV2t1haEXKM-n8iyVpzCU9gx-CmTMPVJjmM0ZDlsXM"
 );
 
-const TU_NUMERO = "5215544690495";
+const TU_NUMERO = "5215613980508";
 
 // ===== PRODUCTOS POR ÁREA =====
 const PRODUCTOS_AREA = {
@@ -267,6 +267,15 @@ const AREA_EMOJIS = {
 
 const ROLES = ["trabajador", "subgerente", "gerente", "admin"];
 
+// ===== ÁREAS ADICIONALES POR USUARIO =====
+// Un trabajador puede tener áreas extra (columna areas_extra en usuarios_cocina,
+// texto separado por comas, ej. "Bebidas,Crepas,Estación Dulce").
+// Ejemplo: Danna es de Pedidos a Domicilio pero entre semana cubre Bebidas, Crepas y Dulce.
+function parseAreasExtra(u) {
+  if (!u || !u.areas_extra) return [];
+  return String(u.areas_extra).split(",").map(s => s.trim()).filter(a => AREAS.includes(a));
+}
+
 // Productos que requieren registrar cuántos gramos se sirvieron del bote.
 // Formato: "Area||Nombre del producto"
 const PRODUCTOS_RELLENABLES = [
@@ -339,7 +348,7 @@ export default function CocinaApp() {
   const [filtroAreaUsuarios, setFiltroAreaUsuarios] = useState("");
   const [mostrarInactivos, setMostrarInactivos] = useState(false);
   const [modalUsuario, setModalUsuario] = useState(null); // null | {nuevo:true} | {usuario obj}
-  const [formUsuario, setFormUsuario] = useState({nombre:"",pin:"",area:"",rol:"trabajador",notas:"",activo:true});
+  const [formUsuario, setFormUsuario] = useState({nombre:"",pin:"",area:"",rol:"trabajador",notas:"",activo:true,areas_extra:[]});
   const [pinVisible, setPinVisible] = useState(false);
   const [errorForm, setErrorForm] = useState("");
   const [guardandoUsuario, setGuardandoUsuario] = useState(false);
@@ -350,8 +359,16 @@ export default function CocinaApp() {
   const esMultiArea = usuario?.rol === "admin" || usuario?.rol === "gerente" || usuario?.rol === "subgerente";
   // Roles que pueden gestionar usuarios (admin y gerente)
   const puedeGestionarUsuarios = usuario?.rol === "admin" || usuario?.rol === "gerente";
+  // Áreas que este usuario puede ver en la pestaña Solicitar:
+  // admin/gerente/subgerente ven todas; trabajadores ven su área + sus áreas extra.
+  const areasVisibles = usuario
+    ? (esMultiArea ? AREAS : [usuario.area, ...parseAreasExtra(usuario).filter(a => a !== usuario.area)])
+    : [];
+  const vistaMultiple = areasVisibles.length > 1;
   // Área que se está mostrando en la pestaña Solicitar
-  const areaMostrada = esMultiArea ? (areaActiva || usuario?.area || AREAS[0]) : usuario?.area;
+  const areaMostrada = vistaMultiple
+    ? (areaActiva && areasVisibles.includes(areaActiva) ? areaActiva : (usuario?.area || areasVisibles[0]))
+    : usuario?.area;
   const productosArea = areaMostrada ? (PRODUCTOS_AREA[areaMostrada] || []) : [];
   const productosFiltrados = productosArea.filter(p =>
     !busq || p.nombre.toLowerCase().includes(busq.toLowerCase())
@@ -499,10 +516,10 @@ export default function CocinaApp() {
 
       const emoji = urgente ? "🚨 URGENTE 🚨" : "📋 Nueva solicitud";
       let msg = `${emoji}\n\n`;
-      msg += `👤 ${usuario.nombre} — ${usuario.rol}\n`;
+      msg += `👤 ${usuario.nombre} — ${AREA_EMOJIS[usuario.area]||""} ${usuario.area}\n`;
       msg += `📅 ${new Date().toLocaleString("es-MX")}\n`;
       if (autoAprobar) msg += `✅ Auto-aprobada\n`;
-      msg += `\n📦 PRODUCTOS:\n`;
+      msg += `\n📦 LE FALTA:\n`;
       Object.entries(porArea).forEach(([area, prods]) => {
         msg += `\n${AREA_EMOJIS[area]||""} ${area.toUpperCase()}:\n`;
         prods.forEach(i => {
@@ -574,7 +591,7 @@ export default function CocinaApp() {
 
   // ===== FUNCIONES PANEL USUARIOS =====
   function abrirModalNuevoUsuario() {
-    setFormUsuario({nombre:"",pin:"",area:AREAS[0],rol:"trabajador",notas:"",activo:true});
+    setFormUsuario({nombre:"",pin:"",area:AREAS[0],rol:"trabajador",notas:"",activo:true,areas_extra:[]});
     setModalUsuario({nuevo:true});
     setPinVisible(false);
     setErrorForm("");
@@ -588,10 +605,18 @@ export default function CocinaApp() {
       rol: u.rol || "trabajador",
       notas: u.notas || "",
       activo: u.activo !== false,
+      areas_extra: parseAreasExtra(u),
     });
     setModalUsuario(u);
     setPinVisible(false);
     setErrorForm("");
+  }
+
+  function toggleAreaExtra(a) {
+    setFormUsuario(f => {
+      const ya = f.areas_extra.includes(a);
+      return {...f, areas_extra: ya ? f.areas_extra.filter(x => x !== a) : [...f.areas_extra, a]};
+    });
   }
 
   async function guardarUsuario() {
@@ -617,6 +642,7 @@ export default function CocinaApp() {
       rol: formUsuario.rol,
       notas: formUsuario.notas.trim(),
       activo: formUsuario.activo,
+      areas_extra: formUsuario.areas_extra.filter(a => a !== formUsuario.area).join(","),
     };
 
     if (modalUsuario.nuevo) {
@@ -766,10 +792,10 @@ export default function CocinaApp() {
         {/* ===== SOLICITAR ===== */}
         {tab==="solicitar"&&(
           <div style={{padding:"16px 16px 120px"}}>
-            {/* Subpestañas de área (solo multi-área) */}
-            {esMultiArea&&(
+            {/* Subpestañas de área (multi-área por rol o por áreas extra) */}
+            {vistaMultiple&&(
               <div style={{display:"flex",gap:"6px",overflowX:"auto",marginBottom:"12px",paddingBottom:"4px"}}>
-                {AREAS.map(a=>{
+                {areasVisibles.map(a=>{
                   const itemsArea = Object.values(carrito).filter(v=>v.area===a&&v.cantidad>0).length;
                   const activa = areaMostrada===a;
                   return(
@@ -789,7 +815,7 @@ export default function CocinaApp() {
               <button onClick={()=>setModalNuevoProd(true)} style={{...btnG,fontSize:"12px",padding:"9px 12px",color:C.info,borderColor:"rgba(129,140,248,0.3)",whiteSpace:"nowrap"}}>+ Nuevo</button>
             </div>
 
-            {esMultiArea&&(
+            {vistaMultiple&&(
               <div style={{fontSize:"11px",color:C.muted,marginBottom:"10px"}}>
                 Mostrando productos de <span style={{color:C.accent,fontWeight:"600"}}>{AREA_EMOJIS[areaMostrada]} {areaMostrada}</span>
               </div>
@@ -985,6 +1011,7 @@ export default function CocinaApp() {
                         {u.id===usuario.id&&<span style={{fontSize:"9px",color:C.accent,background:"rgba(125,211,252,0.15)",padding:"1px 6px",borderRadius:"4px",fontWeight:"700"}}>TÚ</span>}
                       </div>
                       <div style={{fontSize:"10px",color:C.muted}}>{u.area} · <span style={{textTransform:"capitalize",color:u.rol==="admin"?C.accent:u.rol==="gerente"?C.info:C.muted}}>{u.rol}</span> · PIN: ••••</div>
+                      {parseAreasExtra(u).length>0&&<div style={{fontSize:"10px",color:C.info}}>+ {parseAreasExtra(u).map(a=>`${AREA_EMOJIS[a]||""} ${a}`).join(" · ")}</div>}
                     </div>
                   </div>
                   <button onClick={()=>abrirModalEditarUsuario(u)} style={{...btnG,fontSize:"11px",padding:"6px 10px"}}>Editar</button>
@@ -1001,7 +1028,7 @@ export default function CocinaApp() {
             {Object.values(carrito).some(v=>v.cantidad>0)&&(
               <div style={{fontSize:"11px",color:C.muted,marginBottom:"8px"}}>
                 {Object.values(carrito).filter(v=>v.cantidad>0).length} producto(s) en tu solicitud
-                {esMultiArea&&(()=>{
+                {vistaMultiple&&(()=>{
                   const areasConItems=[...new Set(Object.values(carrito).filter(v=>v.cantidad>0).map(v=>v.area))];
                   return areasConItems.length>1?` · ${areasConItems.length} áreas`:"";
                 })()}
@@ -1164,14 +1191,29 @@ export default function CocinaApp() {
               </div>
 
               <div style={{marginBottom:"10px"}}>
+                <label style={lbl}>Áreas adicionales (opcional)</label>
+                <div style={{background:"rgba(7,10,18,0.6)",border:`1px solid ${C.border}`,borderRadius:"10px",padding:"10px 12px"}}>
+                  {AREAS.filter(a=>a!==formUsuario.area).map(a=>(
+                    <label key={a} style={{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:formUsuario.areas_extra.includes(a)?C.accent:C.muted,padding:"4px 0",cursor:"pointer"}}>
+                      <input type="checkbox" checked={formUsuario.areas_extra.includes(a)} onChange={()=>toggleAreaExtra(a)} style={{cursor:"pointer"}}/>
+                      {AREA_EMOJIS[a]} {a}
+                    </label>
+                  ))}
+                </div>
+                <div style={{fontSize:"10px",color:C.muted,marginTop:"4px"}}>
+                  El usuario podrá pedir productos de estas áreas además de la suya (en pestañas). Ej. Danna: Domicilios + Bebidas, Crepas y Dulce.
+                </div>
+              </div>
+
+              <div style={{marginBottom:"10px"}}>
                 <label style={lbl}>Rol *</label>
                 <select value={formUsuario.rol} onChange={e=>setFormUsuario(f=>({...f,rol:e.target.value}))} style={{...inp,cursor:"pointer",textTransform:"capitalize"}}>
                   {ROLES.map(r=><option key={r} value={r} style={{textTransform:"capitalize"}}>{r}</option>)}
                 </select>
                 <div style={{fontSize:"10px",color:C.muted,marginTop:"4px"}}>
-                  {formUsuario.rol==="trabajador"&&"Solo puede solicitar productos"}
-                  {formUsuario.rol==="subgerente"&&"Puede solicitar productos"}
-                  {formUsuario.rol==="gerente"&&"Puede solicitar, aprobar y ver historial"}
+                  {formUsuario.rol==="trabajador"&&"Solo puede solicitar productos (de su área y sus áreas adicionales)"}
+                  {formUsuario.rol==="subgerente"&&"Ve todas las áreas en pestañas y sus pedidos se auto-aprueban"}
+                  {formUsuario.rol==="gerente"&&"Ve todas las áreas en pestañas, aprueba solicitudes y ve historial"}
                   {formUsuario.rol==="admin"&&"Acceso total + gestión de usuarios"}
                 </div>
               </div>
