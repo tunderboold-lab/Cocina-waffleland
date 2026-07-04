@@ -413,6 +413,19 @@ export default function CocinaApp() {
     setModalLogin(true);
   }
 
+  // ===== MODO CONTEO =====
+  // El equipo captura lo que TIENE en su estación; la app calcula lo que se pide:
+  // pedido = óptimo - lo que hay (nunca menos de 0).
+  function setTengo(p, valor) {
+    const limpio = valor.replace(/[^\d.]/g, "");
+    const key = areaMostrada + "||" + p.nombre;
+    setCarrito(c => {
+      const tengoNum = limpio === "" ? null : parseFloat(limpio);
+      const pedido = (tengoNum === null || isNaN(tengoNum)) ? 0 : Math.max(0, Math.round((p.optimo - tengoNum) * 100) / 100);
+      return {...c, [key]: {...c[key], nombre: p.nombre, id: p.id, area: areaMostrada, unidad: p.unidad, tengo: limpio, cantidad: pedido}};
+    });
+  }
+
   // ===== DESCUENTO DE INVENTARIO POR ID (núcleo del arreglo) =====
   // Descuenta del inventario los items aprobados, usando el id real del producto.
   // Si un item no tiene id (frutas/preparados tema futuro), se salta el descuento.
@@ -477,6 +490,7 @@ export default function CocinaApp() {
       .filter(v => v.cantidad > 0)
       .map(v => {
         const item = {nombre: v.nombre, id: v.id || null, unidad: v.unidad, cantidad: v.cantidad, nota: v.nota || "", area: v.area || usuario.area};
+        if (v.tengo !== undefined && v.tengo !== "") item.tengo = +v.tengo;
         if (esRellenable(item.area, item.nombre) && v.gramos) item.gramos = +v.gramos;
         return item;
       });
@@ -526,7 +540,11 @@ export default function CocinaApp() {
       Object.entries(porArea).forEach(([area, prods]) => {
         msg += `\n${AREA_EMOJIS[area]||""} ${area.toUpperCase()}:\n`;
         prods.forEach(i => {
-          msg += `• ${i.nombre}: ${i.cantidad} ${i.unidad}`;
+          if (i.tengo !== undefined) {
+            msg += `• ${i.nombre}: tiene ${i.tengo} → pide ${i.cantidad} ${i.unidad}`;
+          } else {
+            msg += `• ${i.nombre}: ${i.cantidad} ${i.unidad}`;
+          }
           if (i.gramos) msg += ` (⚖️ ${i.gramos} gr servidos)`;
           if (i.nota) msg += ` (${i.nota})`;
           msg += "\n";
@@ -616,7 +634,7 @@ export default function CocinaApp() {
       items.forEach(i => {
         if (i.cantidad > 0) {
           totalProds++;
-          msg += `\u2022 ${i.area && i.area !== s.area ? (AREA_EMOJIS[i.area]||"") + " " : ""}${i.nombre}: ${i.cantidad} ${i.unidad}`;
+          msg += `\u2022 ${i.area && i.area !== s.area ? (AREA_EMOJIS[i.area]||"") + " " : ""}${i.nombre}: ${i.tengo !== undefined ? `tiene ${i.tengo} \u2192 pide ` : ""}${i.cantidad} ${i.unidad}`;
           if (i.gramos) msg += ` (\u2696\uFE0F ${i.gramos} gr)`;
           msg += `\n`;
         } else if (s.estado === "agotado") {
@@ -868,18 +886,27 @@ export default function CocinaApp() {
                 return(
                   <div key={key} style={{background:"rgba(13,17,23,0.8)",border:`1px solid ${qty>0?"rgba(125,211,252,0.3)":C.border}`,borderRadius:"12px",padding:"12px 14px",backdropFilter:"blur(10px)"}}>
                     <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-                      <div style={{flex:1}}>
+                      <div style={{flex:1,minWidth:0}}>
                         <div style={{fontSize:"13px",fontWeight:"600"}}>{p.nombre}</div>
+                        <div style={{fontSize:"10px",color:C.muted}}>Óptimo: <span style={{color:C.accent,fontWeight:"700"}}>{p.optimo} {p.unidad}</span></div>
                       </div>
-                      <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                        <div style={{fontSize:"10px",color:C.muted,textAlign:"right",lineHeight:"1.2",whiteSpace:"nowrap"}}>Óptimo<br/><span style={{color:C.accent,fontWeight:"700",fontSize:"12px"}}>{p.optimo} {p.unidad}</span></div>
-                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,id:p.id,area:areaMostrada,unidad:p.unidad,cantidad:Math.max(0,(c[key]?.cantidad||0)-1)}}))}
-                          style={{background:"rgba(248,113,113,0.2)",border:"none",color:C.danger,width:"28px",height:"28px",borderRadius:"7px",cursor:"pointer",fontSize:"16px",fontWeight:"700"}}>−</button>
-                        <div style={{background:qty>0?"rgba(125,211,252,0.15)":"rgba(255,255,255,0.05)",border:`1px solid ${qty>0?"rgba(125,211,252,0.3)":"rgba(255,255,255,0.1)"}`,borderRadius:"8px",padding:"4px 10px",fontFamily:"'JetBrains Mono',monospace",fontWeight:"600",color:qty>0?C.accent:C.muted,fontSize:"13px",minWidth:"64px",textAlign:"center"}}>
-                          {qty} {p.unidad}
+                      <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                        <div style={{textAlign:"center"}}>
+                          <div style={{fontSize:"10px",color:C.muted,marginBottom:"3px"}}>Tengo</div>
+                          <input type="text" inputMode="decimal" placeholder="—" value={carrito[key]?.tengo ?? ""}
+                            onChange={e=>setTengo(p, e.target.value)}
+                            style={{width:"66px",background:"rgba(7,10,18,0.8)",border:`1px solid ${(carrito[key]?.tengo??"")!==""?"rgba(125,211,252,0.4)":C.border}`,borderRadius:"8px",padding:"6px 8px",color:C.text,fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",textAlign:"center",outline:"none"}}/>
                         </div>
-                        <button onClick={()=>setCarrito(c=>({...c,[key]:{...c[key],nombre:p.nombre,id:p.id,area:areaMostrada,unidad:p.unidad,cantidad:(c[key]?.cantidad||0)+1}}))}
-                          style={{background:"rgba(52,211,153,0.2)",border:"none",color:C.success,width:"28px",height:"28px",borderRadius:"7px",cursor:"pointer",fontSize:"16px",fontWeight:"700"}}>+</button>
+                        <div style={{textAlign:"center",minWidth:"88px"}}>
+                          <div style={{fontSize:"10px",color:C.muted,marginBottom:"3px"}}>Se pide</div>
+                          {(carrito[key]?.tengo??"")===""?(
+                            <div style={{fontSize:"12px",color:C.muted,padding:"4px 0"}}>—</div>
+                          ):qty>0?(
+                            <div style={{background:"rgba(125,211,252,0.15)",border:"1px solid rgba(125,211,252,0.3)",borderRadius:"8px",padding:"4px 8px",fontFamily:"'JetBrains Mono',monospace",fontWeight:"600",color:C.accent,fontSize:"13px",whiteSpace:"nowrap"}}>{qty} {p.unidad}</div>
+                          ):(
+                            <div style={{fontSize:"11px",color:C.success,fontWeight:"700",padding:"4px 0"}}>✅ Completo</div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     {qty>0&&esRellenable(areaMostrada,p.nombre)&&(
@@ -1104,7 +1131,7 @@ export default function CocinaApp() {
                   <div key={idx} style={{background:"rgba(7,10,18,0.6)",border:`1px solid ${C.border}`,borderRadius:"10px",padding:"10px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"10px"}}>
                     <div style={{flex:1}}>
                       <div style={{fontSize:"12px",fontWeight:"600"}}>{i.area&&i.area!==modalAprobar.area?`${AREA_EMOJIS[i.area]||""} `:""}{i.nombre}</div>
-                      <div style={{fontSize:"10px",color:C.muted}}>Solicitó: {i.cantidad} {i.unidad}</div>
+                      <div style={{fontSize:"10px",color:C.muted}}>Solicitó: {i.cantidad} {i.unidad}{i.tengo!==undefined?` · tenía ${i.tengo}`:""}</div>
                       {i.gramos&&<div style={{fontSize:"10px",color:C.warn}}>⚖️ {i.gramos} gr servidos</div>}
                       {i.nota&&<div style={{fontSize:"10px",color:C.muted,fontStyle:"italic"}}>💬 {i.nota}</div>}
                     </div>
