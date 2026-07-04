@@ -9,6 +9,9 @@ const supabase = createClient(
 
 const TU_NUMERO = "5215613980508";
 
+// Número de Rayo: aquí llega el REPORTE consolidado del día
+const NUMERO_REPORTE = "5215544690495";
+
 // ===== PRODUCTOS POR ÁREA =====
 const PRODUCTOS_AREA = {
   "Cajera": [
@@ -589,6 +592,43 @@ export default function CocinaApp() {
     setFormNuevoProd({nombre:"",unidad:"",nota:""});
   }
 
+  // ===== REPORTE DEL DÍA (gerente/admin) =====
+  function enviarReporteDia() {
+    const hoy = new Date();
+    // El "día" del reporte corre de 6:00 am a 6:00 am, para que el cierre
+    // después de medianoche siga contando como el mismo turno.
+    const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 6, 0, 0);
+    if (hoy.getHours() < 6) inicio.setDate(inicio.getDate() - 1);
+    const delDia = solicitudes.filter(s => new Date(s.creado_en) >= inicio);
+    if (delDia.length === 0) {
+      alert("Hoy no hay solicitudes registradas todavía.");
+      return;
+    }
+    let totalProds = 0;
+    let msg = `\u{1F4CA} REPORTE DEL D\u00CDA \u2014 Cocina Waffleland\n`;
+    msg += `\u{1F4C5} ${hoy.toLocaleDateString("es-MX", {weekday:"long", day:"numeric", month:"long"})}\n`;
+    msg += `\u{1F4CB} ${delDia.length} solicitud${delDia.length!==1?"es":""}\n`;
+    [...delDia].reverse().forEach(s => {
+      const items = JSON.parse(s.items || "[]");
+      const est = ESTADOS[s.estado] || ESTADOS.pendiente;
+      const hora = new Date(s.creado_en).toLocaleTimeString("es-MX", {hour:"2-digit", minute:"2-digit"});
+      msg += `\n\u{1F464} ${s.usuario_nombre} \u2014 ${AREA_EMOJIS[s.area]||""} ${s.area} (${hora}) ${est.label}\n`;
+      items.forEach(i => {
+        if (i.cantidad > 0) {
+          totalProds++;
+          msg += `\u2022 ${i.area && i.area !== s.area ? (AREA_EMOJIS[i.area]||"") + " " : ""}${i.nombre}: ${i.cantidad} ${i.unidad}`;
+          if (i.gramos) msg += ` (\u2696\uFE0F ${i.gramos} gr)`;
+          msg += `\n`;
+        } else if (s.estado === "agotado") {
+          msg += `\u2022 AGOTADO: ${i.nombre}\n`;
+        }
+      });
+      if (s.nota_general) msg += `\u{1F4AC} ${s.nota_general}\n`;
+    });
+    msg += `\n\u{1F4E6} Total: ${totalProds} producto(s) pedidos en el d\u00EDa`;
+    window.open(`https://wa.me/${NUMERO_REPORTE}?text=${encodeURIComponent(msg)}`, "_blank");
+  }
+
   // ===== FUNCIONES PANEL USUARIOS =====
   function abrirModalNuevoUsuario() {
     setFormUsuario({nombre:"",pin:"",area:AREAS[0],rol:"trabajador",notas:"",activo:true,areas_extra:[]});
@@ -946,8 +986,11 @@ export default function CocinaApp() {
         {/* ===== HISTORIAL (Admin/Gerente) ===== */}
         {tab==="historial"&&esGerenteOAdmin&&(
           <div style={{padding:"16px 16px 40px"}}>
-            <div style={{fontWeight:"700",fontSize:"15px",marginBottom:"4px"}}>Historial Completo</div>
-            <div style={{fontSize:"11px",color:C.muted,marginBottom:"16px"}}>Todas las solicitudes del equipo</div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"8px",marginBottom:"4px",flexWrap:"wrap"}}>
+              <div style={{fontWeight:"700",fontSize:"15px"}}>Historial Completo</div>
+              <button onClick={enviarReporteDia} style={{...btnP,fontSize:"12px",padding:"7px 12px",background:"linear-gradient(135deg,#34d399,#059669)"}}>📲 Reporte del día</button>
+            </div>
+            <div style={{fontSize:"11px",color:C.muted,marginBottom:"16px"}}>Todas las solicitudes del equipo · el reporte se manda por WhatsApp a Rayo</div>
             {solicitudes.map(s=>{
               const items = JSON.parse(s.items||"[]");
               const est = ESTADOS[s.estado]||ESTADOS.pendiente;
